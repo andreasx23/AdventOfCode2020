@@ -38,8 +38,7 @@ namespace AdventOfCode.Day16
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            Console.WriteLine(nearbyTickets.Count);
-
+            Console.WriteLine("TODO");
             int ans = 0;
 
             watch.Stop();
@@ -48,7 +47,7 @@ namespace AdventOfCode.Day16
 
         private void ReadData()
         {
-            string path = @"C:\Users\bruger\Desktop\Advent of code\Day 16\input.txt";
+            string path = @"C:\Users\bruger\Desktop\AdventOfCode2020\Day 16\input.txt";
             var lines = File.ReadAllLines(path);
 
             int counter = 0;
