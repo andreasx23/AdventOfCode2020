@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Day18
 {
-    public class Day18Part1
+    public class Day18Part2
     {
         private List<string> input = new List<string>();
 
@@ -73,8 +73,8 @@ namespace AdventOfCode.Day18
                 {
                     resultOfS.Append(stack.Pop());
                 }
-                string reverse = Reverse(resultOfS);                
-                string calc = WeirdCalculation(reverse);                
+                string reverse = Reverse(resultOfS);
+                string calc = WeirdCalculation(reverse);
                 ans += BigInteger.Parse(calc);
 
                 //Console.WriteLine(s + " == " + calc);
@@ -87,39 +87,50 @@ namespace AdventOfCode.Day18
         private string WeirdCalculation(string expression)
         {
             int index = 0, n = expression.Length;
-            bool hasLeft = false;
-            StringBuilder left = new StringBuilder(), right = new StringBuilder();
+            char[] operators = new char[] { '-', '*', '/' };
 
-            char _operator = '?';
-            char[] operators = new char[] { '+', '-', '*', '/' };
+            Stack<char> stack = new Stack<char>();
             while (index != n)
             {
                 char c = expression[index];
-                if (operators.Contains(c))
+                if (c == '+')
                 {
-                    if (hasLeft)
+                    stack.Push(c);
+                    index++;
+                    while (index != n && char.IsDigit(expression[index]))
                     {
-                        string result = BosMathCalculation($"{left} {_operator} {right}");
-                        left = new StringBuilder(result);
-                        right.Clear();
+                        stack.Push(expression[index]);
+                        index++;
                     }
-                    
-                    _operator = c;
-                    hasLeft = true;
-                }
-                else if (!hasLeft)
-                {
-                    left.Append(c);
+
+                    StringBuilder sb = new StringBuilder();
+                    while (stack.Count > 0 && !operators.Contains(stack.Peek()))
+                    {
+                        sb.Append(stack.Pop());
+                    }
+
+                    var result = BosMathCalculation(Reverse(sb));
+                    foreach (var item in result)
+                    {
+                        stack.Push(item);
+                    }
+
+                    continue;
                 }
                 else
                 {
-                    right.Append(c);
+                    stack.Push(c);
                 }
 
                 index++;
             }
 
-            var res = BosMathCalculation($"{left} {_operator} {right}");
+            StringBuilder stackValue = new StringBuilder();
+            while (stack.Count > 0)
+            {
+                stackValue.Append(stack.Pop());
+            }
+            var res = BosMathCalculation(Reverse(stackValue));
             return res;
         }
 
@@ -178,7 +189,7 @@ namespace AdventOfCode.Day18
 
         private void ReadData()
         {
-            string path = @"C:\Users\bruger\Desktop\AdventOfCode2020\Day 18\input.txt";
+            string path = @"C:\Users\andre\Desktop\AdventOfCode2020\Day 18\input.txt";
             input = File.ReadAllLines(path).Select(s => s.Replace(" ", "")).ToList();
         }
 
