@@ -81,6 +81,8 @@
     <Compile Include="Day18\Day18Part2.cs" />
     <Compile Include="Day19\Day19Part1.cs" />
     <Compile Include="Day20\Day20Part1.cs" />
+    <Compile Include="Day21\Day21Part1.cs" />
+    <Compile Include="Day21\Day21Part2.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
