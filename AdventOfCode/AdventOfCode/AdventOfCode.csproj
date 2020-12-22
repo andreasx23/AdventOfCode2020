@@ -54,6 +54,8 @@
     <Compile Include="Day12\Day12Part2.cs" />
     <Compile Include="Day13\Day13Part1.cs" />
     <Compile Include="Day13\Day13Part2.cs" />
+    <Compile Include="Day14\Day14Part1.cs" />
+    <Compile Include="Day14\Day14Part2.cs" />
     <Compile Include="Day15\Day15Part1.cs" />
     <Compile Include="Day15\Day15Part2.cs" />
     <Compile Include="Day16\Day16Part1.cs" />
@@ -83,6 +85,8 @@
     <Compile Include="Day20\Day20Part1.cs" />
     <Compile Include="Day21\Day21Part1.cs" />
     <Compile Include="Day21\Day21Part2.cs" />
+    <Compile Include="Day22\Day22Part1.cs" />
+    <Compile Include="Day22\Day22Part2.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
