@@ -10,11 +10,11 @@ namespace AdventOfCode.Day14
 {
     public class Day14Part1
     {
-        private Dictionary<string, List<Mem>> map = new Dictionary<string, List<Mem>>();
+        private readonly Dictionary<string, List<Mem>> map = new Dictionary<string, List<Mem>>();
 
         public class Mem
         {
-            public long id;
+            public long address;
             public long value;
         }
 
@@ -38,7 +38,7 @@ namespace AdventOfCode.Day14
                         }
                     }
 
-                    bits[mem.id] = Convert.ToInt64(new string(valueToBit), 2);
+                    bits[mem.address] = Convert.ToInt64(new string(valueToBit), 2);
                 }
             }
             long ans = bits.Values.Sum();
@@ -75,7 +75,7 @@ namespace AdventOfCode.Day14
 
                     map[mask].Add(new Mem()
                     {
-                        id = id,
+                        address = id,
                         value = value
                     });
                 }

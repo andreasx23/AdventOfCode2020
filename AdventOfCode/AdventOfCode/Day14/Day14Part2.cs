@@ -10,11 +10,11 @@ namespace AdventOfCode.Day14
 {
     public class Day14Part2
     {
-        private Dictionary<string, List<Mem>> map = new Dictionary<string, List<Mem>>();
+        private readonly Dictionary<string, List<Mem>> map = new Dictionary<string, List<Mem>>();
 
         public class Mem
         {
-            public long id;
+            public long address;
             public long value;
         }
 
@@ -28,7 +28,7 @@ namespace AdventOfCode.Day14
             {
                 foreach (var mem in kvp.Value)
                 {                    
-                    char[] valueToBit = Convert.ToString(mem.id, 2).PadLeft(36, '0').ToCharArray();
+                    char[] valueToBit = Convert.ToString(mem.address, 2).PadLeft(36, '0').ToCharArray();
                     for (int i = 0; i < valueToBit.Length; i++)
                     {
                         char c = kvp.Key[i];
@@ -39,9 +39,9 @@ namespace AdventOfCode.Day14
                     }
                     
                     var ids = GetAddresses(new string(valueToBit));
-                    foreach (var _id in ids)
+                    foreach (var id in ids)
                     {
-                        bits[Convert.ToInt64(_id, 2)] = mem.value;
+                        bits[Convert.ToInt64(id, 2)] = mem.value;
                     }
                 }
             }
@@ -98,7 +98,7 @@ namespace AdventOfCode.Day14
 
                     map[mask].Add(new Mem()
                     {
-                        id = id,
+                        address = id,
                         value = value
                     });
                 }
