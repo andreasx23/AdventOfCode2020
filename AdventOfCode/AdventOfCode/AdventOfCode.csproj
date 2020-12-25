@@ -48,6 +48,8 @@
   <ItemGroup>
     <Compile Include="2019\Day01\Day1Part1.cs" />
     <Compile Include="2019\Day01\Day1Part2.cs" />
+    <Compile Include="2019\Day02\Day2Part1.cs" />
+    <Compile Include="2019\Day02\Day2Part2.cs" />
     <Compile Include="2020\Day10\Day10Part1.cs" />
     <Compile Include="2020\Day10\Day10Part2.cs" />
     <Compile Include="2020\Day11\Day11Part1.cs" />
