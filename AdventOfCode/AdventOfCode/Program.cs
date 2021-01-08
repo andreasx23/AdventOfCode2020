@@ -1,5 +1,7 @@
 ﻿using AdventOfCode._2019.Day01;
 using AdventOfCode._2019.Day02;
+using AdventOfCode._2019.Day03;
+using AdventOfCode._2019.Day04;
 
 namespace AdventOfCode
 {
@@ -7,7 +9,7 @@ namespace AdventOfCode
     {
         public static void Main(string[] args)
         {
-            Day2Part2 d = new Day2Part2();
+            Day4Part2 d = new Day4Part2();
             d.TestCase();
         }
     }

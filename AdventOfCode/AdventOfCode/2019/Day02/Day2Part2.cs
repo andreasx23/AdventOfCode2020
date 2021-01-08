@@ -57,14 +57,8 @@ namespace AdventOfCode._2019.Day02
                 int targetIndex = list[i + 3];
 
                 int sum = -1;
-                if (opcode == 1)
-                {
-                    sum = first + second;
-                }
-                else if (opcode == 2)
-                {
-                    sum = first * second;
-                }
+                if (opcode == 1) sum = first + second;
+                else if (opcode == 2) sum = first * second;
 
                 list[targetIndex] = sum;
             }
