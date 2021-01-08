@@ -17,38 +17,36 @@ namespace AdventOfCode._2019.Day04
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            //ans > 1141 && ans < 1215
             int ans = 0;
             for (int i = 0; i < max - min; i++)
             {
                 string num = (min + i).ToString();
                 int n = num.Length;
 
-                Dictionary<char, int> count = new Dictionary<char, int>();
-                bool isNext = true;
+                if (n != 6) continue;
+
+                bool isNext = false;
                 for (int j = 0; j < n - 1; j++)
                 {
+                    int count = 0;
+
                     if (num[j] == num[j + 1])
                     {
-                        char temp = num[j];
-
-                        if (!count.ContainsKey(temp)) count.Add(temp, 0);
-                        count[temp] += 2;
+                        char prev = num[j];
+                        count += 2;
 
                         j += 2;
-                        while (j != n && num[j] == temp)
+                        while (j != n && num[j] == prev)
                         {
-                            count[temp]++;
+                            count++;
                             j++;
                         }
+                        j--; //-1 to step one back cuz of loop
 
-                        if (count[temp] % 2 > 0)
-                        {
-                            isNext = false;
-                        }
-                        else
+                        if (count == 2)
                         {
                             isNext = true;
+                            break;
                         }
                     }
                 }
@@ -69,16 +67,17 @@ namespace AdventOfCode._2019.Day04
 
                 if (!isIncrease) continue;
 
-                if (isNext && isIncrease) ans++;
+                ans++;
             }
 
             watch.Stop();
+            Console.WriteLine("Expected: 6");
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
         }
 
         private void ReadData()
         {
-            string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2019\Day04\input.txt";
+            string path = @"C:\Users\bruger\Desktop\AdventOfCode2020\2019\Day04\input.txt";
             var input = File.ReadAllLines(path)[0].Split('-').Select(int.Parse).ToList();
             min = input[0];
             max = input[1];

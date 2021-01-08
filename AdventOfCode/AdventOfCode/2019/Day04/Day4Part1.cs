@@ -49,7 +49,7 @@ namespace AdventOfCode._2019.Day04
 
                 if (!isIncrease) continue;
 
-                if (isNext && isIncrease) ans++;
+                ans++;
             }
 
             watch.Stop();
@@ -58,7 +58,7 @@ namespace AdventOfCode._2019.Day04
 
         private void ReadData()
         {
-            string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2019\Day04\input.txt";
+            string path = @"C:\Users\bruger\Desktop\AdventOfCode2020\2019\Day04\input.txt";
             var input = File.ReadAllLines(path)[0].Split('-').Select(int.Parse).ToList();
             min = input[0];
             max = input[1];
