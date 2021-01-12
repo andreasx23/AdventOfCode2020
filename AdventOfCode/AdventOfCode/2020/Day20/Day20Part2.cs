@@ -38,24 +38,18 @@ namespace AdventOfCode._2020.Day20
                     
                 }
 
-                List<StringBuilder> sbs = new List<StringBuilder>();
+                List<StringBuilder> sbs = new List<StringBuilder>();                
                 for (int j = 1; j < arrays[0][0].Length - 1; j++)
                 {
-                    sbs.Add(new StringBuilder());
-                }
+                    StringBuilder sb = new StringBuilder();
 
-                int _index = 0, round = 1;
-                while (round != arrays[0][0].Length - 1)
-                {
-                    string word = new string(arrays[_index][round]).Substring(1, 8);
-                    sbs[round - 1].Append(word);
-
-                    _index++;
-                    if (_index == arrays.Count)
+                    for (int k = 0; k < arrays.Count; k++)
                     {
-                        round++;
-                        _index = 0;
+                        string word = new string(arrays[k][j]).Substring(1, 8);
+                        sb.Append(word);
                     }
+
+                    sbs.Add(sb);
                 }
 
                 for (int j = 0; j < sbs.Count; j++)
@@ -79,10 +73,11 @@ namespace AdventOfCode._2020.Day20
                         {
                             for (int m = 0; m < monster[x].Length; m++)
                             {
-                                if (monster[x][m] == '#' && copy[j + x][k + m] == monster[x][m])
+                                int _x = j + x;
+                                int _y = k + m;
+
+                                if (monster[x][m] == '#' && copy[_x][_y] == monster[x][m])
                                 {
-                                    int _x = j + x;
-                                    int _y = k + m;
                                     coords.Add((_x, _y));
                                     count++;
                                 }
