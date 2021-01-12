@@ -6,22 +6,128 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AdventOfCode.Day20
+namespace AdventOfCode._2020.Day20
 {
-    public class Day20Part1
+    public class Day20Part2
     {
         private readonly Dictionary<int, char[][]> grids = new Dictionary<int, char[][]>();
         private readonly Dictionary<char[][], long> ids = new Dictionary<char[][], long>();
+        private readonly List<string> monster = new List<string>()
+        {
+            "                  # ",
+            "#    ##    ##    ###",
+            " #  #  #  #  #  #   "
+        };
 
         private void Day20()
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            int size = 12; //3
+            int size = 12;
+            var image = GenerateImage(size); //3 - 12
+
+            var grid = GenerateGrid(size * 8); //24 - 96
+            int index = 0;
+            for (int i = 0; i < image.Count; i++)
+            {
+                List<char[][]> arrays = new List<char[][]>();                
+                for (int j = 0; j < image[i].Count; j++)
+                {
+                    arrays.Add(image[i][j]);
+                    
+                }
+
+                List<StringBuilder> sbs = new List<StringBuilder>();
+                for (int j = 1; j < arrays[0][0].Length - 1; j++)
+                {
+                    sbs.Add(new StringBuilder());
+                }
+
+                int _index = 0, round = 1;
+                while (round != arrays[0][0].Length - 1)
+                {
+                    string word = new string(arrays[_index][round]).Substring(1, 8);
+                    sbs[round - 1].Append(word);
+
+                    _index++;
+                    if (_index == arrays.Count)
+                    {
+                        round++;
+                        _index = 0;
+                    }
+                }
+
+                for (int j = 0; j < sbs.Count; j++)
+                {
+                    grid[index++] = sbs[j].ToString().ToArray();
+                }
+            }
 
             long ans = 0;
-            int n = grids.Count;            
+            for (int i = 0; i <= 8; i++)
+            {
+                char[][] copy = (char[][])grid.Clone();
+                int sea = 0;
+                for (int j = 0; j < copy.Length - monster.Count; j++)
+                {
+                    for (int k = 0; k < copy[j].Length - monster[0].Length; k++)
+                    {
+                        int count = 0;
+                        List<(int x, int y)> coords = new List<(int, int)>();
+                        for (int x = 0; x < monster.Count; x++)
+                        {
+                            for (int m = 0; m < monster[x].Length; m++)
+                            {
+                                if (monster[x][m] == '#' && copy[j + x][k + m] == monster[x][m])
+                                {
+                                    int _x = j + x;
+                                    int _y = k + m;
+                                    coords.Add((_x, _y));
+                                    count++;
+                                }
+                            }
+                        }
+
+                        if (count == 15)
+                        {
+                            foreach (var (x, y) in coords)
+                            {
+                                copy[x][y] = 'O';
+                            }
+
+                            sea++;
+                        }
+                    }
+                }
+
+                if (sea > 0)
+                {
+                    Console.WriteLine("Monters: " + sea);
+                    int temp = 0;
+                    foreach (var row in copy)
+                    {
+                        Console.WriteLine(string.Join("", row));
+                        temp += row.Count(c => c == '#');
+                    }
+                    ans = Math.Max(ans, temp);
+                }
+
+                grid = Rotate(copy);
+                if (i == 4)
+                {
+                    grid = Flip(copy);
+                }
+            }
+
+            watch.Stop();
+            Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
+        }
+
+        private List<List<char[][]>> GenerateImage(int size)
+        {
+            int n = grids.Count;
+
             for (int index = 0; index < n; index++)
             {
                 List<List<char[][]>> puzzle = new List<List<char[][]>>();
@@ -103,17 +209,16 @@ namespace AdventOfCode.Day20
 
                         if (i == size)
                         {
-                            for (int j = 0; j < size; j++)
-                            {
-                                for (int k = 0; k < size; k++)
-                                {
-                                    Console.Write(ids[puzzle[j][k]] + " ");
-                                }
-                                Console.WriteLine();
-                            }
+                            //for (int j = 0; j < size; j++)
+                            //{
+                            //    for (int k = 0; k < size; k++)
+                            //    {
+                            //        Console.Write(ids[puzzle[j][k]] + " ");
+                            //    }
+                            //    Console.WriteLine();
+                            //}
 
-                            ans = ids[puzzle.First().First()] * ids[puzzle.First().Last()] * ids[puzzle.Last().First()] * ids[puzzle.Last().Last()];
-                            break;
+                            return puzzle;
                         }
                     }
                     else
@@ -123,8 +228,7 @@ namespace AdventOfCode.Day20
                 }
             }
 
-            watch.Stop();
-            Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
+            return null;
         }
 
         private char[][] GenerateGrid(int size)
@@ -143,12 +247,23 @@ namespace AdventOfCode.Day20
             char[][] temp = GenerateGrid(grid.Length);
             for (int i = 0; i < grid.Length; i++)
             {
-                for (int k = 0; k < grid[0].Length; k++)
+                for (int j = 0; j < grid[0].Length; j++)
                 {
-                    temp[k][temp.Length - 1 - i] = grid[i][k];
+                    temp[j][temp.Length - 1 - i] = grid[i][j];
                 }
             }
             return temp;
+        }
+
+        private char[][] Flip(char[][] grid)
+        {
+            char[][] flip = GenerateGrid(grid.Length);
+            int position = 0;
+            for (int i = grid.Length - 1; i >= 0; i--)
+            {
+                flip[position++] = grid[i];
+            }
+            return flip;
         }
 
         private void ReadData()
@@ -178,12 +293,7 @@ namespace AdventOfCode.Day20
                     }
 
                     index++;
-                    char[][] flip = GenerateGrid(10);
-                    int position = 0;
-                    for (int i = grid.Length - 1; i >= 0; i--)
-                    {
-                        flip[position++] = grid[i];
-                    }
+                    char[][] flip = Flip(grid);
                     grids.Add(index, flip);
                     ids.Add(flip, currentID);
 

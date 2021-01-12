@@ -55,6 +55,9 @@
     <Compile Include="2019\Day03\Day3Part2.cs" />
     <Compile Include="2019\Day04\Day4Part1.cs" />
     <Compile Include="2019\Day04\Day4Part2.cs" />
+    <Compile Include="2019\Day05\Day5Part1.cs" />
+    <Compile Include="2019\Day06\Day6Part1.cs" />
+    <Compile Include="2019\Day07\Day7Part1.cs" />
     <Compile Include="2020\Day10\Day10Part1.cs" />
     <Compile Include="2020\Day10\Day10Part2.cs" />
     <Compile Include="2020\Day11\Day11Part1.cs" />
@@ -92,6 +95,7 @@
     <Compile Include="2020\Day18\Day18Part2.cs" />
     <Compile Include="2020\Day19\Day19Part1.cs" />
     <Compile Include="2020\Day20\Day20Part1.cs" />
+    <Compile Include="2020\Day20\Day20Part2.cs" />
     <Compile Include="2020\Day21\Day21Part1.cs" />
     <Compile Include="2020\Day21\Day21Part2.cs" />
     <Compile Include="2020\Day22\Day22Part1.cs" />
