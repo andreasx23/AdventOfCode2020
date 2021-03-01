@@ -31,14 +31,14 @@ namespace AdventOfCode._2020.Day20
             int index = 0;
             for (int i = 0; i < image.Count; i++)
             {
-                List<char[][]> arrays = new List<char[][]>();                
+                List<char[][]> arrays = new List<char[][]>();
                 for (int j = 0; j < image[i].Count; j++)
                 {
                     arrays.Add(image[i][j]);
-                    
+
                 }
 
-                List<StringBuilder> sbs = new List<StringBuilder>();                
+                List<StringBuilder> sbs = new List<StringBuilder>();
                 for (int j = 1; j < arrays[0][0].Length - 1; j++)
                 {
                     StringBuilder sb = new StringBuilder();
