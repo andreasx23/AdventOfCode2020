@@ -19,7 +19,6 @@ namespace AdventOfCode._2018.Day06
 
         private readonly List<Tile> tiles = new List<Tile>();
 
-        //https://adventofcode.com/2018/day/6#part2
         private void Day6()
         {
             Stopwatch watch = new Stopwatch();
@@ -31,59 +30,68 @@ namespace AdventOfCode._2018.Day06
             for (int i = 0; i < height; i++)
             {
                 grid[i] = new char[width];
+
+                for (int j = 0; j < width; j++)
+                {
+                    grid[i][j] = '.';
+                }
             }
 
-            Queue<Tile> queue = new Queue<Tile>();
-            bool[,] isVisited = new bool[height, width];
             foreach (var tile in tiles)
             {
                 grid[tile.X][tile.Y] = tile.Value;
-                queue.Enqueue(tile);
-                isVisited[tile.X, tile.Y] = true;
-            }
-
-            while (queue.Any())
-            {
-                var current = queue.Dequeue();
-
-                List<Tile> adjecentTiles = WalkableAdjecentTiles(grid, current, isVisited, false);
-                foreach (var tile in adjecentTiles)
-                {
-                    if (!isVisited[tile.X, tile.Y])
-                    {
-                        isVisited[tile.X, tile.Y] = true;
-                        queue.Enqueue(tile);
-                        grid[tile.X][tile.Y] = tile.Value;
-                    }
-                }
             }
 
             for (int x = 0; x < height; x++)
             {
                 for (int y = 0; y < width; y++)
                 {
-                    int minDistance = int.MaxValue;
-                    char minTileValue = '#';
+                    int sum = 0;
                     foreach (var tile in tiles)
                     {
-                        var distance = CalculateManhattenDistance(tile.X, x, tile.Y, y);
-                        if (distance < minDistance)
-                        {
-                            minDistance = distance;
-                            minTileValue = tile.Value;
-                        }
+                        sum += CalculateManhattenDistance(tile.X, x, tile.Y, y);
                     }
 
-                    foreach (var tile in tiles)
+                    if (sum < 10000 && grid[x][y] == '.')
                     {
-                        if (tile.Value != minTileValue)
+                        grid[x][y] = '#';
+                    }
+                }
+            }
+
+            Queue<Tile> queue = new Queue<Tile>();
+            bool[,] isVisited = new bool[height, width];
+            foreach (var tile in tiles)
+            {
+                List<Tile> adjecentTiles = WalkableAdjecentTiles(grid, tile, isVisited);
+
+                foreach (var _tile in adjecentTiles)
+                {
+                    if (grid[_tile.X][_tile.Y] == '#')
+                    {
+                        queue.Enqueue(tile);
+                        isVisited[tile.X, tile.Y] = true;
+                        break;
+                    }
+                }
+            }
+
+            long ans = queue.Count;
+            while (queue.Any())
+            {
+                var current = queue.Dequeue();
+
+                List<Tile> adjecentTiles = WalkableAdjecentTiles(grid, current, isVisited);
+                foreach (var tile in adjecentTiles)
+                {
+                    if (!isVisited[tile.X, tile.Y])
+                    {
+                        isVisited[tile.X, tile.Y] = true;
+
+                        if (grid[tile.X][tile.Y] == '#')
                         {
-                            var equalDistance = CalculateManhattenDistance(tile.X, x, tile.Y, y);
-                            if (minDistance == equalDistance)
-                            {
-                                grid[x][y] = '.';
-                                break;
-                            }
+                            ans++;
+                            queue.Enqueue(tile);
                         }
                     }
                 }
@@ -91,52 +99,11 @@ namespace AdventOfCode._2018.Day06
 
             //Print(grid);
 
-            long ans = 0;
-            foreach (var tile in tiles)
-            {
-                Console.WriteLine("Checking: " + tile.Value);
-                Queue<Tile> tempQueue = new Queue<Tile>();
-                tempQueue.Enqueue(tile);
-                bool[,] tempIsVisited = new bool[height, width];
-                tempIsVisited[tile.X, tile.Y] = true;
-
-                long sum = 1;
-                while (tempQueue.Any())
-                {
-                    var current = tempQueue.Dequeue();
-
-                    List<Tile> adjecentTiles = WalkableAdjecentTiles(grid, current, tempIsVisited, true);
-                    if (adjecentTiles.Count == 0) //Not valid
-                    {
-                        sum = 0;
-                        break;
-                    }
-                    else
-                    {
-                        foreach (var adTile in adjecentTiles)
-                        {
-                            if (!tempIsVisited[adTile.X, adTile.Y])
-                            {
-                                tempIsVisited[adTile.X, adTile.Y] = true;
-
-                                if (char.ToLower(tile.Value) == adTile.Value)
-                                {
-                                    tempQueue.Enqueue(adTile);
-                                    sum++;
-                                }
-                            }
-                        }
-                    }
-                }
-                Console.WriteLine(sum);
-                ans = Math.Max(ans, sum);
-            }
-
             watch.Stop();
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
         }
 
-        private List<Tile> WalkableAdjecentTiles(char[][] grid, Tile current, bool[,] isVisited, bool isAnswer)
+        private List<Tile> WalkableAdjecentTiles(char[][] grid, Tile current, bool[,] isVisited)
         {
             List<Tile> manhattenCoordinates = new List<Tile>()
             {
@@ -152,27 +119,9 @@ namespace AdventOfCode._2018.Day06
                 tile.X += current.X;
                 tile.Y += current.Y;
 
-                if (!isAnswer)
+                if (tile.X < 0 || tile.X >= grid.Length || tile.Y < 0 || tile.Y >= grid[0].Length || isVisited[tile.X, tile.Y]) //Boundary check
                 {
-                    tile.Value = char.ToLower(current.Value);
-
-                    if (tile.X < 0 || tile.X >= grid.Length || tile.Y < 0 || tile.Y >= grid[0].Length || isVisited[tile.X, tile.Y]) //Boundary check
-                    {
-                        continue;
-                    }
-                }
-                else
-                {
-                    if (tile.X < 0 || tile.X >= grid.Length || tile.Y < 0 || tile.Y >= grid[0].Length) //Boundary check
-                    {
-                        return new List<Tile>();
-                    }
-
-                    tile.Value = grid[tile.X][tile.Y];
-                    if (isVisited[tile.X, tile.Y])
-                    {
-                        continue;
-                    }
+                    continue;
                 }
 
                 walkable.Add(tile);
