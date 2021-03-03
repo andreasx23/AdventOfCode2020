@@ -61,16 +61,15 @@ namespace AdventOfCode._2018.Day06
 
             Queue<Tile> queue = new Queue<Tile>();
             bool[,] isVisited = new bool[height, width];
-            foreach (var tile in tiles)
+            foreach (var currentTile in tiles)
             {
-                List<Tile> adjecentTiles = WalkableAdjecentTiles(grid, tile, isVisited);
-
-                foreach (var _tile in adjecentTiles)
+                List<Tile> adjecentTiles = WalkableAdjecentTiles(grid, currentTile, isVisited);
+                foreach (var tile in adjecentTiles)
                 {
-                    if (grid[_tile.X][_tile.Y] == '#')
+                    if (grid[tile.X][tile.Y] == '#')
                     {
-                        queue.Enqueue(tile);
-                        isVisited[tile.X, tile.Y] = true;
+                        queue.Enqueue(currentTile);
+                        isVisited[currentTile.X, currentTile.Y] = true;
                         break;
                     }
                 }
@@ -90,8 +89,8 @@ namespace AdventOfCode._2018.Day06
 
                         if (grid[tile.X][tile.Y] == '#')
                         {
-                            ans++;
                             queue.Enqueue(tile);
+                            ans++;                            
                         }
                     }
                 }
@@ -148,7 +147,7 @@ namespace AdventOfCode._2018.Day06
             string path = @"C:\Users\bruger\Desktop\AdventOfCode2020\2018\Day06\input.txt";
             var lines = File.ReadAllLines(path).Select(s => s.Split(',').Select(s => int.Parse(s.Trim())).ToList()).ToList();
 
-            for (int i = 0; i < lines.Count(); i++)
+            for (int i = 0; i < lines.Count; i++)
             {
                 tiles.Add(new Tile()
                 {

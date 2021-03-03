@@ -198,7 +198,7 @@ namespace AdventOfCode._2018.Day06
             string path = @"C:\Users\bruger\Desktop\AdventOfCode2020\2018\Day06\input.txt";
             var lines = File.ReadAllLines(path).Select(s => s.Split(',').Select(s => int.Parse(s.Trim())).ToList()).ToList();
 
-            for (int i = 0; i < lines.Count(); i++)
+            for (int i = 0; i < lines.Count; i++)
             {
                 tiles.Add(new Tile()
                 {
