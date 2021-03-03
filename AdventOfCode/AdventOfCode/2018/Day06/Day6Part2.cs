@@ -27,14 +27,14 @@ namespace AdventOfCode._2018.Day06
 
             int size = 1000;
             int width = size, height = size;
-            char[][] grid = new char[width][];
+            char[][] grid = new char[height][];
             for (int i = 0; i < height; i++)
             {
-                grid[i] = new char[height];
+                grid[i] = new char[width];
             }
 
             Queue<Tile> queue = new Queue<Tile>();
-            bool[,] isVisited = new bool[width, height];
+            bool[,] isVisited = new bool[height, width];
             foreach (var tile in tiles)
             {
                 grid[tile.X][tile.Y] = tile.Value;
@@ -76,12 +76,14 @@ namespace AdventOfCode._2018.Day06
 
                     foreach (var tile in tiles)
                     {
-                        if (tile.Value == minTileValue) continue;
-
-                        var equalDistance = CalculateManhattenDistance(tile.X, x, tile.Y, y);
-                        if (minDistance == equalDistance)
+                        if (tile.Value != minTileValue)
                         {
-                            grid[x][y] = '.';
+                            var equalDistance = CalculateManhattenDistance(tile.X, x, tile.Y, y);
+                            if (minDistance == equalDistance)
+                            {
+                                grid[x][y] = '.';
+                                break;
+                            }
                         }
                     }
                 }
@@ -95,15 +97,15 @@ namespace AdventOfCode._2018.Day06
                 Console.WriteLine("Checking: " + tile.Value);
                 Queue<Tile> tempQueue = new Queue<Tile>();
                 tempQueue.Enqueue(tile);
-                bool[,] _isVisited = new bool[width, height];
-                _isVisited[tile.X, tile.Y] = true;
+                bool[,] tempIsVisited = new bool[height, width];
+                tempIsVisited[tile.X, tile.Y] = true;
 
                 long sum = 1;
                 while (tempQueue.Any())
                 {
                     var current = tempQueue.Dequeue();
 
-                    List<Tile> adjecentTiles = WalkableAdjecentTiles(grid, current, _isVisited, true);
+                    List<Tile> adjecentTiles = WalkableAdjecentTiles(grid, current, tempIsVisited, true);
                     if (adjecentTiles.Count == 0) //Not valid
                     {
                         sum = 0;
@@ -113,9 +115,9 @@ namespace AdventOfCode._2018.Day06
                     {
                         foreach (var adTile in adjecentTiles)
                         {
-                            if (!_isVisited[adTile.X, adTile.Y])
+                            if (!tempIsVisited[adTile.X, adTile.Y])
                             {
-                                _isVisited[adTile.X, adTile.Y] = true;
+                                tempIsVisited[adTile.X, adTile.Y] = true;
 
                                 if (char.ToLower(tile.Value) == adTile.Value)
                                 {
@@ -195,7 +197,7 @@ namespace AdventOfCode._2018.Day06
         private void ReadData()
         {
             string path = @"C:\Users\bruger\Desktop\AdventOfCode2020\2018\Day06\input.txt";
-            var lines = File.ReadAllLines(path).Select(s => s.Split(',').Select(s => s.Trim()).Select(int.Parse).ToList()).ToList();
+            var lines = File.ReadAllLines(path).Select(s => s.Split(',').Select(s => int.Parse(s.Trim())).ToList()).ToList();
 
             for (int i = 0; i < lines.Count(); i++)
             {
