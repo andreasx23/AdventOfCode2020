@@ -23,6 +23,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <LangVersion>8.0</LangVersion>
+    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -59,6 +60,14 @@
     <Compile Include="2018\Day05\Day5Part2.cs" />
     <Compile Include="2018\Day06\Day6Part1.cs" />
     <Compile Include="2018\Day06\Day6Part2.cs" />
+    <Compile Include="2018\Day07\Day7Part1.cs" />
+    <Compile Include="2018\Day08\Day8Part1.cs" />
+    <Compile Include="2018\Day10\Day10Part1.cs" />
+    <Compile Include="2018\Day11\Day11Part1.cs" />
+    <Compile Include="2018\Day11\Day11Part2.cs" />
+    <Compile Include="2018\Day12\Day12Part1.cs" />
+    <Compile Include="2018\Day12\Day12Part2.cs" />
+    <Compile Include="2018\Day13\Day13Part1.cs" />
     <Compile Include="2019\Day01\Day1Part1.cs" />
     <Compile Include="2019\Day01\Day1Part2.cs" />
     <Compile Include="2019\Day02\Day2Part1.cs" />
