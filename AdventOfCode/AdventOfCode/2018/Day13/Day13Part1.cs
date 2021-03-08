@@ -14,10 +14,9 @@ namespace AdventOfCode._2018.Day13
         {
             public int X;
             public int Y;
-            public char Value;
+            public char ID;
             public char Direction;
             private int IntersectionState;
-            public bool HitCornerOrIntersection;
 
             public Minecart()
             {
@@ -48,8 +47,6 @@ namespace AdventOfCode._2018.Day13
         private int H = 0, W = 0;
 
         private readonly List<Minecart> minecarts = new List<Minecart>();
-        private List<char> directions = new List<char>() { 'v', '<', '>', '^' };
-        private List<char> tracks = new List<char>() { '+', '|', '-', '/', '\\' };
 
         //https://adventofcode.com/2018/day/13
         private void Day13()
@@ -57,149 +54,187 @@ namespace AdventOfCode._2018.Day13
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
+            int turns = 0;
             bool isFinished = false;
-            (int X, int Y) ans = (-1, -1);
+            (int X, int Y) ans = (0, 0);
             while (!isFinished)
             {
+                turns++;
                 foreach (var minecart in minecarts)
                 {
-                    char currPos = 'X';
-                    
+                    char currPos = grid[minecart.X][minecart.Y];
+
+                    //Console.WriteLine(minecart.ID + " " + currPos + " " + minecart.Direction);
                     switch (minecart.Direction)
                     {
                         case '<':
                             {
-                                if (minecart.Y == 0)
+                                if (currPos == '-')
                                 {
+                                    minecart.Y += -1;
+                                }
+                                else if (currPos == '|')
+                                {
+                                    Console.WriteLine("Not valid");
+                                    //Not valid direction
+                                }
+                                else if (currPos == '/')
+                                {
+                                    minecart.Direction = 'v';
+                                    minecart.X += 1;
+                                }
+                                else if (currPos == '\\')
+                                {
+                                    minecart.Direction = '^';
+                                    minecart.X += -1;
+                                }
+                                else if (currPos == '+')
+                                {
+                                    var state = minecart.GetIntersectionState();
 
-
-                                    currPos = grid[minecart.X - 1][0];
-                                }
-
-                                if (minecart.X == 0 && minecart.Y == 0)
-                                {
-                                    currPos = grid[1][0];
-                                }
-                                else if (minecart.X == H - 1 && minecart.Y == 0)
-                                {
-                                    currPos = grid[H - 1][0];
-                                }
-                                else
-                                {
-                                    currPos = grid[minecart.X][minecart.Y - 1];
-                                }
-
-                                if (minecart.HitCornerOrIntersection)
-                                {
-                                    if (currPos == '-')
-                                    {
-                                        minecart.Y += -1;
-                                        minecart.HitCornerOrIntersection = false;
-                                    }
-                                    else if (currPos == '|')
-                                    {
-                                        //Not valid direction
-                                    }
-                                }
-                                else
-                                {
-                                    if (currPos == '/')
+                                    if (state == 1)
                                     {
                                         minecart.Direction = 'v';
-                                        minecart.HitCornerOrIntersection = true;
+                                        minecart.X += 1;
                                     }
-                                    else if (currPos == '\\')
+                                    else if (state == 2)
+                                    {
+                                        minecart.Direction = '<';
+                                        minecart.Y += -1;
+                                    }
+                                    else
                                     {
                                         minecart.Direction = '^';
-                                        minecart.HitCornerOrIntersection = true;
+                                        minecart.X += -1;
                                     }
                                 }
                             }
                             break;
                         case '>':
                             {
-
-                                if (minecart.HitCornerOrIntersection)
+                                if (currPos == '-')
                                 {
-                                    if (currPos == '-')
-                                    {
-                                        minecart.Y += -1;
-                                        minecart.HitCornerOrIntersection = false;
-                                    }
-                                    else if (currPos == '|')
-                                    {
-                                        //Not valid direction
-                                    }
+                                    minecart.Y += 1;
                                 }
-                                else
+                                else if (currPos == '|')
                                 {
-                                    if (currPos == '/')
+                                    Console.WriteLine("Not valid");
+                                    //Not valid direction
+                                }
+                                else if (currPos == '/')
+                                {
+                                    minecart.Direction = '^';
+                                    minecart.X += -1;
+                                }
+                                else if (currPos == '\\')
+                                {
+                                    minecart.Direction = 'v';
+                                    minecart.X += 1;
+                                }
+                                else if (currPos == '+')
+                                {
+                                    var state = minecart.GetIntersectionState();
+
+                                    if (state == 1)
                                     {
                                         minecart.Direction = '^';
-                                        minecart.HitCornerOrIntersection = true;
+                                        minecart.X += -1;
                                     }
-                                    else if (currPos == '\\')
+                                    else if (state == 2)
+                                    {
+                                        minecart.Direction = '>';
+                                        minecart.Y += 1;
+                                    }
+                                    else
                                     {
                                         minecart.Direction = 'v';
-                                        minecart.HitCornerOrIntersection = true;
+                                        minecart.X += 1;
                                     }
                                 }
                             }
                             break;
                         case '^':
                             {
-                                if (minecart.HitCornerOrIntersection)
+                                if (currPos == '-')
                                 {
-                                    if (currPos == '-')
-                                    {
-                                        //Not valid direction
-                                    }
-                                    else if (currPos == '|')
-                                    {
-                                        minecart.X += -1;
-                                        minecart.HitCornerOrIntersection = false;
-                                    }
+                                    Console.WriteLine("Not valid");
+                                    //Not valid direction
                                 }
-                                else
+                                else if (currPos == '|')
                                 {
-                                    if (currPos == '/')
-                                    {
-                                        minecart.Direction = '>';
-                                        minecart.HitCornerOrIntersection = true;
-                                    }
-                                    else if (currPos == '\\')
+                                    minecart.X += -1;
+                                }
+                                else if (currPos == '/')
+                                {
+                                    minecart.Direction = '>';
+                                    minecart.Y += 1;
+                                }
+                                else if (currPos == '\\')
+                                {
+                                    minecart.Direction = '<';
+                                    minecart.Y += -1;
+                                }
+                                else if (currPos == '+')
+                                {
+                                    var state = minecart.GetIntersectionState();
+
+                                    if (state == 1)
                                     {
                                         minecart.Direction = '<';
-                                        minecart.HitCornerOrIntersection = true;
+                                        minecart.Y += -1;
                                     }
-                                }                                
+                                    else if (state == 2)
+                                    {
+                                        minecart.Direction = '^';
+                                        minecart.X += -1;
+                                    }
+                                    else
+                                    {
+                                        minecart.Direction = '>';
+                                        minecart.Y += 1;
+                                    }
+                                }
                             }
                             break;
                         case 'v':
                             {
-                                if (minecart.HitCornerOrIntersection)
+                                if (currPos == '-')
                                 {
-                                    if (currPos == '-')
-                                    {
-                                        //Not valid direction
-                                    }
-                                    else if (currPos == '|')
-                                    {
-                                        minecart.X += 1;
-                                        minecart.HitCornerOrIntersection = false;
-                                    }
+                                    Console.WriteLine("Not valid");
+                                    //Not valid direction
                                 }
-                                else
+                                else if (currPos == '|')
                                 {
-                                    if (currPos == '/')
-                                    {
-                                        minecart.Direction = '<';
-                                        minecart.HitCornerOrIntersection = true;
-                                    }
-                                    else if (currPos == '\\')
+                                    minecart.X += 1;
+                                }
+                                else if (currPos == '/')
+                                {
+                                    minecart.Direction = '<';
+                                    minecart.Y += -1;
+                                }
+                                else if (currPos == '\\')
+                                {
+                                    minecart.Direction = '>';
+                                    minecart.Y += 1;
+                                }
+                                else if (currPos == '+')
+                                {
+                                    var state = minecart.GetIntersectionState();
+
+                                    if (state == 1)
                                     {
                                         minecart.Direction = '>';
-                                        minecart.HitCornerOrIntersection = true;
+                                        minecart.Y += 1;
+                                    }
+                                    else if (state == 2)
+                                    {
+                                        minecart.Direction = 'v';
+                                        minecart.X += 1;
+                                    }
+                                    else
+                                    {
+                                        minecart.Direction = '<';
+                                        minecart.Y += -1;
                                     }
                                 }
                             }
@@ -207,70 +242,57 @@ namespace AdventOfCode._2018.Day13
                         default:
                             throw new Exception();
                     }
-                }
 
-                foreach (var minecart in minecarts)
-                {
-                    if (minecarts.Any(m => m.Value != minecart.Value && m.X == minecart.X && m.Y == minecart.Y))
+                    if (minecarts.Any(m => m.ID != minecart.ID && m.X == minecart.X && m.Y == minecart.Y))
                     {
+                        //Console.WriteLine(turns);
+                        //grid[minecart.X][minecart.Y] = '#';
+                        //Print();
+
                         ans = (minecart.X, minecart.Y);
                         isFinished = true;
+                        break;
                     }
                 }
+
+                //Print();
+                //Console.WriteLine();
             }
 
             watch.Stop();
-            Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
+            Console.WriteLine($"Answer: {ans.Y},{ans.X} took {watch.ElapsedMilliseconds} ms");
         }
 
-        private char nextStep(char[][] grid, Minecart minecart)
+        private void Print()
         {
-            List<(int X, int Y)> dirs = new List<(int X, int Y)>()
+            for (int i = 0; i < H; i++)
             {
-                (-1, 0), //Up
-                (1, 0),  //Down
-                (0, -1), //Left
-                (0, 1),  //Right
-            };
-
-            char step = '#';
-            foreach (var d in dirs)
-            {
-                int tempX = d.X + minecart.X;
-                int tempY = d.Y + minecart.Y;
-
-                if (tempX < 0 || tempX >= grid.Length || tempY < 0 || tempY >= grid[0].Length)
+                for (int j = 0; j < W; j++)
                 {
-                    continue;
+                    var cart = minecarts.FirstOrDefault(m => i == m.X && j == m.Y);
+                    if (cart != null)
+                    {
+                        Console.Write(cart.ID);
+                    }
+                    else
+                    {
+                        Console.Write(grid[i][j]);
+                    }
                 }
-
-                switch (minecart.Direction)
-                {
-                    case '<':
-
-                        break;
-                    case '>':
-
-                        break;
-                    case '^':
-                        break;
-                    case 'v':
-                        break;
-                    default:
-                        throw new Exception();
-                }
+                Console.WriteLine();
             }
-
-            return step;
         }
 
         private void ReadData()
         {
-            string path = @"C:\Users\bruger\Desktop\AdventOfCode2020\2018\Day13\sample.txt";
+            string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2018\Day13\input.txt";
             var lines = File.ReadAllLines(path);
+
+            List<char> directions = new List<char>() { 'v', '<', '>', '^' };
 
             H = lines.Length;
             grid = new char[H][];
+            int index = 0;
             for (int i = 0; i < H; i++)
             {
                 grid[i] = lines[i].ToCharArray();
@@ -279,13 +301,25 @@ namespace AdventOfCode._2018.Day13
                 {
                     if (directions.Contains(grid[i][j]))
                     {
+                        var dir = directions.Find(s => s == grid[i][j]);
                         minecarts.Add(new Minecart()
                         {
                             X = i,
                             Y = j,
-                            Direction = directions.Find(s => s == grid[i][j]),
-                            Value = Convert.ToChar(i + 'A')
+                            Direction = dir,
+                            ID = Convert.ToChar(index + 'A')
                         });
+
+                        index++;
+
+                        if (dir == '<' || dir == '>')
+                        {
+                            grid[i][j] = '-';
+                        }
+                        else
+                        {
+                            grid[i][j] = '|';
+                        }
                     }
                 }
             }
