@@ -14,11 +14,11 @@ namespace AdventOfCode._2018.Day17
         {
             public int X;
             public int Y;
-            public CellValue CellValue;
+            public CellValue Value;
         }
 
         private List<Tile> tiles = new List<Tile>();
-        private Tile well = new Tile() { X = 0, Y = 50, CellValue = CellValue.Well }; //0 500 +
+        private readonly Tile well = new Tile() { X = 0, Y = 50, Value = CellValue.Well }; //0 500 +
         private static int minY = int.MaxValue, maxY = int.MinValue, minX = int.MaxValue, maxX = int.MinValue, H = maxX - minX, W = maxY - minY;
 
         enum CellValue
@@ -31,6 +31,7 @@ namespace AdventOfCode._2018.Day17
         }
 
         //https://adventofcode.com/2018/day/17
+        //Cannot solve it
         private void Day17()
         {
             Stopwatch watch = new Stopwatch();
@@ -39,13 +40,13 @@ namespace AdventOfCode._2018.Day17
             H = 25;
             W = 75;
 
-            char[][] grid = new char[H][];
+            CellValue[][] grid = new CellValue[H][];
             for (int i = 0; i < H; i++)
             {
-                grid[i] = new char[W];
+                grid[i] = new CellValue[W];
                 for (int j = 0; j < grid[i].Length; j++)
                 {
-                    grid[i][j] = '.';
+                    grid[i][j] = CellValue.Sand;
                 }
             }
 
@@ -69,18 +70,18 @@ namespace AdventOfCode._2018.Day17
             Queue<Tile> queue = new Queue<Tile>();
 
             int tempX = well.X + 1, tempY = well.Y;
-            while (grid[tempX][tempY] != '#')
+            while (grid[tempX][tempY] != CellValue.Clay)
             {
                 Tile tile = new Tile()
                 {
                     X = tempX,
                     Y = tempY,
-                    Value = '|'
+                    Value = CellValue.WaterDropping
                 };
                 grid[tempX][tempY] = tile.Value;
                 tiles.Add(tile);
 
-                if (grid[tempX][tempY + 1] == '#' || grid[tempX][tempY - 1] == '#')
+                if (grid[tempX][tempY + 1] == CellValue.Clay || grid[tempX][tempY - 1] == CellValue.Clay)
                 {
                     queue.Enqueue(tile);
                 }
@@ -95,13 +96,13 @@ namespace AdventOfCode._2018.Day17
                 grid[current.X][current.Y] = current.Value;
 
                 int newX = current.X, newY = current.Y - 1;
-                if (grid[newX][newY] != '#')
+                if (grid[newX][newY] != CellValue.Clay)
                 {
                     Tile tile = new Tile()
                     {
                         X = newX,
                         Y = newY,
-                        Value = '~'
+                        Value = CellValue.WaterFlowing
                     };
                     queue.Enqueue(tile);                    
                 }
@@ -114,17 +115,17 @@ namespace AdventOfCode._2018.Day17
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
         }
 
-        private void Print(char[][] grid)
+        private void Print(CellValue[][] grid)
         {
             foreach (var item in grid)
             {
-                Console.WriteLine(string.Join("" , item));
+                Console.WriteLine(string.Join("", item.Select(c => (char)c)));
             }
         }
 
         private void ReadData()
         {
-            string path = @"C:\Users\bruger\Desktop\AdventOfCode2020\2018\Day17\sample.txt";
+            string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2018\Day17\sample.txt";
             var lines = File.ReadAllLines(path);
 
             foreach (var s in lines)
@@ -144,7 +145,7 @@ namespace AdventOfCode._2018.Day17
                         {
                             X = i,
                             Y = int.Parse(leftPart.Last()),
-                            Value = '#'
+                            Value = CellValue.Clay
                         };
 
                         tiles.Add(temp);
@@ -158,7 +159,7 @@ namespace AdventOfCode._2018.Day17
                         {
                             X = int.Parse(leftPart.Last()),
                             Y = i,
-                            Value = '#'
+                            Value = CellValue.Clay
                         };
 
                         tiles.Add(temp);
