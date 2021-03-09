@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode._2018.Day13
 {
-    public class Day13Part1
+    public class Day13Part2
     {
         class Minecart
         {
@@ -17,10 +17,12 @@ namespace AdventOfCode._2018.Day13
             public char ID;
             public char Direction;
             private int IntersectionState;
+            public bool isCrashed;
 
             public Minecart()
             {
                 IntersectionState = 1;
+                isCrashed = false;
             }
 
             public int GetIntersectionState()
@@ -62,9 +64,18 @@ namespace AdventOfCode._2018.Day13
                 turns++;
                 foreach (var minecart in minecarts)
                 {
-                    char currPos = grid[minecart.X][minecart.Y];
+                    if (minecart.isCrashed) continue;
 
-                    //Console.WriteLine(minecart.ID + " " + currPos + " " + minecart.Direction);
+                    var hitMinecart = minecarts.FirstOrDefault(m => m.ID != minecart.ID && !m.isCrashed && m.X == minecart.X && m.Y == minecart.Y);
+                    if (hitMinecart != null)
+                    {
+                        minecart.isCrashed = true;
+                        hitMinecart.isCrashed = true;
+                        continue;
+                    }
+
+                    char currPos = grid[minecart.X][minecart.Y];
+                    
                     switch (minecart.Direction)
                     {
                         case '<':
@@ -200,7 +211,7 @@ namespace AdventOfCode._2018.Day13
                             {
                                 if (currPos == '-')
                                 {
-                                    Console.WriteLine("Not valid");
+                                    Console.WriteLine("Not valid"); 
                                     throw new Exception();
                                 }
                                 else if (currPos == '|')
@@ -242,21 +253,33 @@ namespace AdventOfCode._2018.Day13
                         default:
                             throw new Exception();
                     }
+                }
 
-                    if (minecarts.Any(m => m.ID != minecart.ID && m.X == minecart.X && m.Y == minecart.Y))
+                List<Minecart> toRemove = new List<Minecart>();
+                foreach (var minecart in minecarts)
+                {
+                    var m2 = minecarts.FirstOrDefault(m => minecart.ID != m.ID && minecart.X == m.X && minecart.Y == m.Y);
+                    if (m2 != null && !toRemove.Contains(minecart))
                     {
-                        Console.WriteLine(turns);
-                        grid[minecart.X][minecart.Y] = '#';
-                        Print();
-
-                        ans = (minecart.X, minecart.Y);
-                        isFinished = true;
-                        break;
+                        toRemove.Add(minecart);
                     }
                 }
 
-                //Print();
-                //Console.WriteLine();
+                foreach (var minecart in toRemove)
+                {
+                    minecarts.Remove(minecart);
+                }
+
+                if (minecarts.Count == 1)
+                {
+                    Console.WriteLine("Total turns: " + turns);
+                    Print();
+                    Console.WriteLine();
+
+                    var minecart = minecarts.First();
+                    ans = (minecart.X, minecart.Y);
+                    isFinished = true;
+                }
             }
 
             watch.Stop();
