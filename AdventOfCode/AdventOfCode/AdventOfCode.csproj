@@ -69,6 +69,7 @@
     <Compile Include="2018\Day12\Day12Part2.cs" />
     <Compile Include="2018\Day13\Day13Part1.cs" />
     <Compile Include="2018\Day13\Day13Part2.cs" />
+    <Compile Include="2018\Day15\Day15Part1.cs" />
     <Compile Include="2018\Day17\Day17Part1.cs" />
     <Compile Include="2019\Day01\Day1Part1.cs" />
     <Compile Include="2019\Day01\Day1Part2.cs" />
@@ -135,5 +136,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

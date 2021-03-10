@@ -10,7 +10,7 @@ namespace AdventOfCode._2018.Day17
 {
     public class Day17Part1
     {
-        class Tile
+        private class Tile
         {
             public int X;
             public int Y;
@@ -21,7 +21,7 @@ namespace AdventOfCode._2018.Day17
         private readonly Tile well = new Tile() { X = 0, Y = 50, Value = CellValue.Well }; //0 500 +
         private static int minY = int.MaxValue, maxY = int.MinValue, minX = int.MaxValue, maxX = int.MinValue, H = maxX - minX, W = maxY - minY;
 
-        enum CellValue
+        private enum CellValue
         {
             Sand = '.',
             Clay = '#',
@@ -91,7 +91,7 @@ namespace AdventOfCode._2018.Day17
 
             while (queue.Any())
             {
-                var current = queue.Dequeue();
+                Tile current = queue.Dequeue();
 
                 grid[current.X][current.Y] = current.Value;
 
@@ -125,7 +125,7 @@ namespace AdventOfCode._2018.Day17
 
         private void ReadData()
         {
-            string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2018\Day17\sample.txt";
+            const string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2018\Day17\sample.txt";
             var lines = File.ReadAllLines(path);
 
             foreach (var s in lines)
