@@ -19,9 +19,11 @@ namespace AdventOfCode._2018.Day15
             public int Attack;
             public int HP;
 
+            //A*
             public int Cost;
             public int Distance;
             public int CostDistance => Cost + Distance;
+            public Tile Parent;
             
             public Tile()
             {
@@ -63,8 +65,18 @@ namespace AdventOfCode._2018.Day15
 
             bool isFinished = false;
             int rounds = 0;
-            while (!isFinished && rounds < 3)
+            while (!isFinished)
             {
+                if (rounds % 50 == 0)
+                {
+                    Console.WriteLine("Rounds: " + rounds);                    
+                    foreach (var item in tiles.OrderBy(t => t.Value))
+                    {
+                        Console.WriteLine("NPC: " + item.ID + " " + item.Value + " " + item.HP);
+                    }
+                    Print(grid);
+                }
+
                 var ordered = tiles.OrderBy(t => t.X).ThenBy(t => t.Y);
                 foreach (var current in ordered)
                 {
@@ -100,15 +112,18 @@ namespace AdventOfCode._2018.Day15
                         {
                             if (current.ID == target.ID || current.Value == target.Value) continue;
 
-                            int distanceToTarget = CalculateManhattenDistance(possiblePossition.X, possiblePossition.Y, target.X, target.Y);
-                            if (distanceToTarget < distanceToClosestTarget)
+                            Tile output = AStar(grid, current, target);
+                            if (output != null)
                             {
-                                stepsTowardClosestTarget = new List<Tile>() { possiblePossition };
-                                distanceToClosestTarget = distanceToTarget;
-                            }
-                            else if (distanceToTarget == distanceToClosestTarget)
-                            {
-                                stepsTowardClosestTarget.Add(possiblePossition);
+                                if (output.CostDistance < distanceToClosestTarget)
+                                {
+                                    stepsTowardClosestTarget = new List<Tile>() { output };
+                                    distanceToClosestTarget = output.CostDistance;
+                                }
+                                else if (output.CostDistance == distanceToClosestTarget)
+                                {
+                                    stepsTowardClosestTarget.Add(output);
+                                }
                             }
                         }
                     }
@@ -125,7 +140,7 @@ namespace AdventOfCode._2018.Day15
 
                 if (!isFinished)
                 {
-                    Print(grid);
+                    //Print(grid);
                     tiles = ordered.ToList();
                     rounds++;
                 }
@@ -156,7 +171,8 @@ namespace AdventOfCode._2018.Day15
                 tile.X += current.X;
                 tile.Y += current.Y;
 
-                if (tile.X < 0 || tile.X >= grid.Length || tile.Y < 0 || tile.Y >= grid[0].Length || grid[tile.X][tile.Y] != '.') continue;
+                if (tile.X < 0 || tile.X >= grid.Length || tile.Y < 0 || tile.Y >= grid[0].Length || 
+                    grid[tile.X][tile.Y] == '#' || grid[tile.X][tile.Y] == current.Value) continue;
 
                 result.Add(tile);
             }
@@ -205,9 +221,52 @@ namespace AdventOfCode._2018.Day15
             return Math.Abs(x2 - x1) + Math.Abs(y2 - y1);
         }
 
+        private Tile AStar(char[][] grid, Tile start, Tile target)
+        {
+            bool[,] isVisited = new bool[H, W];
+            Queue<Tile> queue = new Queue<Tile>();
+            start.Cost = 1;
+            start.Parent = null;
+            start.Distance = CalculateManhattenDistance(start.X, start.Y, target.X, target.Y);
+            queue.Enqueue(start);
+            isVisited[start.X, start.Y] = true;
+
+            List<Tile> ans = new List<Tile>();
+            while (queue.Any())
+            {
+                var current = queue.Dequeue();
+
+                if (current.X == target.X && current.Y == target.Y)
+                {
+                    var temp = current;
+                    List<Tile> output = new List<Tile>();
+                    while (temp.Parent != null)
+                    {
+                        output.Add(temp);
+                        temp = temp.Parent;
+                    }
+                    ans.Add(output.Last());
+                }
+
+                var walkable = WalkablePositions(grid, current);
+                foreach (var tile in walkable)
+                {
+                    if (!isVisited[tile.X, tile.Y])
+                    {
+                        isVisited[tile.X, tile.Y] = true;
+                        tile.Cost = current.Cost + 1;
+                        current.Distance = CalculateManhattenDistance(tile.X, tile.Y, target.X, target.Y);
+                        tile.Parent = current;
+                        queue.Enqueue(tile);
+                    }
+                }
+            }
+            return ans.Count > 0 ? ans.OrderBy(t => t.X).ThenBy(t => t.Y).First() : null;
+        }
+
         private void ReadData()
         {
-            const string path = @"C:\Users\bruger\Desktop\AdventOfCode2020\2018\Day15\sample.txt";
+            const string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2018\Day15\sample2.txt";
             var lines = File.ReadAllLines(path);
 
             H = lines.Length;
