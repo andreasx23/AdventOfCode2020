@@ -10,28 +10,6 @@ namespace AdventOfCode._2018.Day15
 {
     public class Day15Part1
     {
-        private class Tile
-        {
-            public int ID;
-            public int X;
-            public int Y;
-            public char Value;
-            public int Attack;
-            public int HP;
-
-            //A*
-            public int Cost;
-            public int Distance;
-            public int CostDistance => Cost + Distance;
-            public Tile Parent;
-            
-            public Tile()
-            {
-                Attack = 3;
-                HP = 200;
-            }
-        }
-
         private char[][] grid;
         private int H = 0, W = 0;
 
@@ -69,7 +47,7 @@ namespace AdventOfCode._2018.Day15
             {
                 if (rounds % 50 == 0)
                 {
-                    Console.WriteLine("Rounds: " + rounds);                    
+                    Console.WriteLine("Rounds: " + rounds);
                     foreach (var item in tiles.OrderBy(t => t.Value))
                     {
                         Console.WriteLine("NPC: " + item.ID + " " + item.Value + " " + item.HP);
@@ -106,24 +84,21 @@ namespace AdventOfCode._2018.Day15
 
                     List<Tile> stepsTowardClosestTarget = new List<Tile>();
                     int distanceToClosestTarget = int.MaxValue;
-                    foreach (var possiblePossition in WalkablePositions(grid, current))
+                    foreach (var possibleTarget in ordered)
                     {
-                        foreach (var target in ordered)
-                        {
-                            if (current.ID == target.ID || current.Value == target.Value) continue;
+                        if (current.ID == possibleTarget.ID || current.Value == possibleTarget.Value) continue;
 
-                            Tile output = AStar(grid, current, target);
-                            if (output != null)
+                        Tile output = AStar(grid, current, possibleTarget);
+                        if (output != null)
+                        {
+                            if (output.CostDistance < distanceToClosestTarget)
                             {
-                                if (output.CostDistance < distanceToClosestTarget)
-                                {
-                                    stepsTowardClosestTarget = new List<Tile>() { output };
-                                    distanceToClosestTarget = output.CostDistance;
-                                }
-                                else if (output.CostDistance == distanceToClosestTarget)
-                                {
-                                    stepsTowardClosestTarget.Add(output);
-                                }
+                                stepsTowardClosestTarget = new List<Tile>() { output };
+                                distanceToClosestTarget = output.CostDistance;
+                            }
+                            else if (output.CostDistance == distanceToClosestTarget)
+                            {
+                                stepsTowardClosestTarget.Add(output);
                             }
                         }
                     }
@@ -140,7 +115,7 @@ namespace AdventOfCode._2018.Day15
 
                 if (!isFinished)
                 {
-                    //Print(grid);
+                    Print(grid);
                     tiles = ordered.ToList();
                     rounds++;
                 }
@@ -149,7 +124,7 @@ namespace AdventOfCode._2018.Day15
             Console.WriteLine("Expected: 20 rounds 937 total HP = 18740");
 
             Print(grid);
-
+            Console.WriteLine("Rounds: " + rounds);
             long ans = rounds * tiles.Sum(t => t.HP);
             watch.Stop();
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
@@ -171,7 +146,7 @@ namespace AdventOfCode._2018.Day15
                 tile.X += current.X;
                 tile.Y += current.Y;
 
-                if (tile.X < 0 || tile.X >= grid.Length || tile.Y < 0 || tile.Y >= grid[0].Length || 
+                if (tile.X < 0 || tile.X >= grid.Length || tile.Y < 0 || tile.Y >= grid[0].Length ||
                     grid[tile.X][tile.Y] == '#' || grid[tile.X][tile.Y] == current.Value) continue;
 
                 result.Add(tile);
@@ -223,16 +198,24 @@ namespace AdventOfCode._2018.Day15
 
         private Tile AStar(char[][] grid, Tile start, Tile target)
         {
+            Dictionary<Tile, Tile> cameFrom = new Dictionary<Tile, Tile>();
+            Dictionary<Tile, double> costSoFar = new Dictionary<Tile, double>();
+
             bool[,] isVisited = new bool[H, W];
-            Queue<Tile> queue = new Queue<Tile>();
-            start.Cost = 1;
-            start.Parent = null;
+            start.Cost = 0;
             start.Distance = CalculateManhattenDistance(start.X, start.Y, target.X, target.Y);
+            start.priority = 0;
+            start.Parent = null;
+            
+            PriorityQueue<Tile> queue = new PriorityQueue<Tile>();
             queue.Enqueue(start);
+            cameFrom[start] = start;
+            costSoFar[start] = 0;
+
             isVisited[start.X, start.Y] = true;
 
             List<Tile> ans = new List<Tile>();
-            while (queue.Any())
+            while (queue.Count() > 0)
             {
                 var current = queue.Dequeue();
 
@@ -242,31 +225,47 @@ namespace AdventOfCode._2018.Day15
                     List<Tile> output = new List<Tile>();
                     while (temp.Parent != null)
                     {
-                        output.Add(temp);
-                        temp = temp.Parent;
+                        output.Add(temp);                        
+                        temp = temp.Parent;                        
                     }
-                    ans.Add(output.Last());
+                    var last = output.Last();
+                    if (ans.Contains(last))
+                    {
+                        return ans.OrderBy(t => t.X).ThenBy(t => t.Y).First();
+                    }
+                    else
+                    {
+                        ans.Add(last);
+                    }
                 }
 
                 var walkable = WalkablePositions(grid, current);
-                foreach (var tile in walkable)
+                foreach (var next in walkable)
                 {
-                    if (!isVisited[tile.X, tile.Y])
+                    double newCost = costSoFar[current] + (isVisited[next.X, next.Y] ? 5 : 1);
+
+                    if (!costSoFar.ContainsKey(next) || newCost < costSoFar[next])
                     {
-                        isVisited[tile.X, tile.Y] = true;
-                        tile.Cost = current.Cost + 1;
-                        current.Distance = CalculateManhattenDistance(tile.X, tile.Y, target.X, target.Y);
-                        tile.Parent = current;
-                        queue.Enqueue(tile);
+                        isVisited[next.X, next.Y] = true;
+                        var priority = newCost + CalculateManhattenDistance(next.X, next.Y, target.X, target.Y);
+                        next.Parent = current;
+                        next.Cost = (int)newCost;
+                        next.Distance = CalculateManhattenDistance(next.X, next.Y, target.X, target.Y);
+                        next.priority = priority;
+
+                        costSoFar[next] = newCost;
+                        cameFrom[next] = current;
+                        queue.Enqueue(next);                        
                     }
                 }
             }
-            return ans.Count > 0 ? ans.OrderBy(t => t.X).ThenBy(t => t.Y).First() : null;
+
+            return null;
         }
 
         private void ReadData()
         {
-            const string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2018\Day15\sample2.txt";
+            const string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2018\Day15\input.txt";
             var lines = File.ReadAllLines(path);
 
             H = lines.Length;

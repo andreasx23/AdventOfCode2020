@@ -70,6 +70,8 @@
     <Compile Include="2018\Day13\Day13Part1.cs" />
     <Compile Include="2018\Day13\Day13Part2.cs" />
     <Compile Include="2018\Day15\Day15Part1.cs" />
+    <Compile Include="2018\Day15\PriorityQueue.cs" />
+    <Compile Include="2018\Day15\Tile.cs" />
     <Compile Include="2018\Day17\Day17Part1.cs" />
     <Compile Include="2019\Day01\Day1Part1.cs" />
     <Compile Include="2019\Day01\Day1Part2.cs" />
