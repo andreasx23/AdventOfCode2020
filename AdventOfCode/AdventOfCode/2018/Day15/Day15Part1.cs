@@ -20,7 +20,7 @@ namespace AdventOfCode._2018.Day15
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            List<Tile> tiles = new List<Tile>();
+            List<Unit> units = new List<Unit>();
             int ids = 0;
             for (int i = 0; i < H; i++)
             {
@@ -28,11 +28,11 @@ namespace AdventOfCode._2018.Day15
                 {
                     if (grid[i][j] == 'E' || grid[i][j] == 'G')
                     {
-                        tiles.Add(new Tile()
+                        units.Add(new Unit()
                         {
                             X = i,
                             Y = j,
-                            Value = grid[i][j],
+                            Type = grid[i][j],
                             ID = ids++
                         });
                     }
@@ -45,137 +45,165 @@ namespace AdventOfCode._2018.Day15
             int rounds = 0;
             while (!isFinished)
             {
-                if (rounds % 50 == 0)
+                foreach (var current in units.OrderBy(t => t.X).ThenBy(t => t.Y))
                 {
-                    Console.WriteLine("Rounds: " + rounds);
-                    foreach (var item in tiles.OrderBy(t => t.Value))
-                    {
-                        Console.WriteLine("NPC: " + item.ID + " " + item.Value + " " + item.HP);
-                    }
-                    Print(grid);
-                }
+                    if (current.HP <= 0) continue;
 
-                var ordered = tiles.OrderBy(t => t.X).ThenBy(t => t.Y);
-                foreach (var current in ordered)
-                {
                     var (isInRange, Enemy) = IsRangeOfEnemy(grid, current);
                     if (isInRange)
                     {
-                        var enemy = tiles.First(t => t.X == Enemy.X && t.Y == Enemy.Y);
+                        var enemy = units.FirstOrDefault(t => t.X == Enemy.X && t.Y == Enemy.Y);
+
+                        if (enemy == null)
+                        {
+                            continue;
+                        }
+
                         enemy.HP -= current.Attack;
 
                         if (enemy.HP <= 0)
                         {
                             grid[enemy.X][enemy.Y] = '.';
-                            tiles.Remove(enemy);
+                            units.Remove(enemy);
                         }
 
-                        if (tiles.Any(t => t.Value == enemy.Value))
+                        if (units.Any(t => t.Type == enemy.Type))
                         {
                             continue;
                         }
                         else
                         {
-                            Console.WriteLine($"THE {enemy.Value} LOST!");
+                            Console.WriteLine($"THE {enemy.Type} LOST!");
                             isFinished = true;
                             break;
                         }
                     }
 
-                    List<Tile> stepsTowardClosestTarget = new List<Tile>();
-                    int distanceToClosestTarget = int.MaxValue;
-                    foreach (var possibleTarget in ordered)
+                    List<Unit> targets = new List<Unit>();
+                    foreach (var possibleTarget in units)
                     {
-                        if (current.ID == possibleTarget.ID || current.Value == possibleTarget.Value) continue;
+                        if (current.Type == possibleTarget.Type) continue;
 
-                        Tile output = AStar(grid, current, possibleTarget);
-                        if (output != null)
+                        var target = GreedyBFS(grid, current, possibleTarget, rounds);
+                        if (target != null)
                         {
-                            if (output.CostDistance < distanceToClosestTarget)
-                            {
-                                stepsTowardClosestTarget = new List<Tile>() { output };
-                                distanceToClosestTarget = output.CostDistance;
-                            }
-                            else if (output.CostDistance == distanceToClosestTarget)
-                            {
-                                stepsTowardClosestTarget.Add(output);
-                            }
+                            targets.Add(target);
                         }
                     }
 
-                    if (stepsTowardClosestTarget.Count > 0)
+                    if (targets.Count > 0)
                     {
-                        Tile position = stepsTowardClosestTarget.OrderBy(t => t.X).ThenBy(t => t.Y).First();
+                        var position = targets.OrderBy(t => t.Distance).ThenBy(t => t.X).ThenBy(t => t.Y).First();
+
                         grid[current.X][current.Y] = '.';
                         current.X = position.X;
                         current.Y = position.Y;
-                        grid[current.X][current.Y] = current.Value;
+                        grid[current.X][current.Y] = current.Type;
+
+                        (isInRange, Enemy) = IsRangeOfEnemy(grid, current);
+                        if (isInRange)
+                        {
+                            var enemy = units.FirstOrDefault(t => t.X == Enemy.X && t.Y == Enemy.Y);
+
+                            if (enemy == null)
+                            {
+                                continue;
+                            }
+
+                            enemy.HP -= current.Attack;
+
+                            if (enemy.HP <= 0)
+                            {
+                                grid[enemy.X][enemy.Y] = '.';
+                                units.Remove(enemy);
+                            }
+
+                            if (units.Any(t => t.Type == enemy.Type))
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                Console.WriteLine($"THE {enemy.Type} LOST!");
+                                isFinished = true;
+                                break;
+                            }
+                        }
                     }
                 }
 
                 if (!isFinished)
                 {
-                    Print(grid);
-                    tiles = ordered.ToList();
                     rounds++;
+                    //Console.WriteLine("Round: " + rounds);
+                    //Print(grid);
                 }
             }
 
             Console.WriteLine("Expected: 20 rounds 937 total HP = 18740");
 
             Print(grid);
-            Console.WriteLine("Rounds: " + rounds);
-            long ans = rounds * tiles.Sum(t => t.HP);
+            
+            var hp = units.Sum(t => t.HP);
+            Console.WriteLine("Rounds: " + rounds + " HP: " + hp);
+
+            Console.WriteLine("Answers is smaller than 121 rounds and 280599 pts");
+            long ans = rounds * hp;
             watch.Stop();
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
         }
 
-        private List<Tile> WalkablePositions(char[][] grid, Tile current)
+        private List<Unit> WalkableCoordinates(char[][] grid, Unit current)
         {
-            List<Tile> coordinates = new List<Tile>()
+            List<Unit> coordinates = new List<Unit>()
             {
-                new Tile(){ X = -1, Y = 0 },
-                new Tile(){ X = +1, Y = 0 },
-                new Tile(){ X = 0, Y = -1 },
-                new Tile(){ X = 0, Y = +1 },
+                new Unit(){ X = -1, Y = 0 },
+                new Unit(){ X = +1, Y = 0 },
+                new Unit(){ X = 0, Y = -1 },
+                new Unit(){ X = 0, Y = +1 },
             };
 
-            List<Tile> result = new List<Tile>();
-            foreach (var tile in coordinates)
+            List<Unit> walkableCoordiantes = new List<Unit>();
+            foreach (var location in coordinates)
             {
-                tile.X += current.X;
-                tile.Y += current.Y;
+                location.X += current.X;
+                location.Y += current.Y;
 
-                if (tile.X < 0 || tile.X >= grid.Length || tile.Y < 0 || tile.Y >= grid[0].Length ||
-                    grid[tile.X][tile.Y] == '#' || grid[tile.X][tile.Y] == current.Value) continue;
+                if (location.X < 0 || location.X >= grid.Length || location.Y < 0 || location.Y >= grid[0].Length || grid[location.X][location.Y] != '.') continue;
 
-                result.Add(tile);
+                walkableCoordiantes.Add(location);
             }
 
-            return result;
+            return walkableCoordiantes;
         }
 
-        private (bool isInRange, Tile Enemy) IsRangeOfEnemy(char[][] grid, Tile current)
+        private (bool isInRange, Unit Enemy) IsRangeOfEnemy(char[][] grid, Unit current)
         {
-            List<Tile> coordinates = new List<Tile>()
+            List<Unit> coordinates = new List<Unit>()
             {
-                new Tile(){ X = -1, Y = 0 },
-                new Tile(){ X = +1, Y = 0 },
-                new Tile(){ X = 0, Y = -1 },
-                new Tile(){ X = 0, Y = +1 },
+                new Unit(){ X = -1, Y = 0 },
+                new Unit(){ X = +1, Y = 0 },
+                new Unit(){ X = 0, Y = -1 },
+                new Unit(){ X = 0, Y = +1 },
             };
 
-            foreach (var tile in coordinates)
+            List<Unit> enemiesInRange = new List<Unit>();
+            foreach (var location in coordinates)
             {
-                tile.X += current.X;
-                tile.Y += current.Y;
+                location.X += current.X;
+                location.Y += current.Y;                
 
-                if (tile.X < 0 || tile.X >= grid.Length || tile.Y < 0 || tile.Y >= grid[0].Length) continue;
+                if (location.X < 0 || location.X >= grid.Length || location.Y < 0 || location.Y >= grid[0].Length || grid[location.X][location.Y] == '#' || grid[location.X][location.Y] == '.') continue;
 
-                if (current.Value == 'E' && grid[tile.X][tile.Y] == 'G' || current.Value == 'G' && grid[tile.X][tile.Y] == 'E')
+                if (current.Type != grid[location.X][location.Y])
                 {
-                    return (true, tile);
+                    enemiesInRange.Add(location);
                 }
+            }
+
+            if (enemiesInRange.Count > 0)
+            {
+                return (true, enemiesInRange.OrderBy(t => t.HP).ThenBy(t => t.X).ThenBy(t => t.Y).First());
             }
 
             return (false, null);
@@ -196,66 +224,123 @@ namespace AdventOfCode._2018.Day15
             return Math.Abs(x2 - x1) + Math.Abs(y2 - y1);
         }
 
-        private Tile AStar(char[][] grid, Tile start, Tile target)
+        public Unit GreedyBFS(char[][] grid, Unit start, Unit target, int rounds)
         {
-            Dictionary<Tile, Tile> cameFrom = new Dictionary<Tile, Tile>();
-            Dictionary<Tile, double> costSoFar = new Dictionary<Tile, double>();
-
-            bool[,] isVisited = new bool[H, W];
             start.Cost = 0;
             start.Distance = CalculateManhattenDistance(start.X, start.Y, target.X, target.Y);
-            start.priority = 0;
+            start.Priority = 0;
             start.Parent = null;
-            
-            PriorityQueue<Tile> queue = new PriorityQueue<Tile>();
+
+            bool[,] isVisited = new bool[H, W];
+            Queue<Unit> queue = new Queue<Unit>();
+            queue.Enqueue(start);
+            isVisited[start.X, start.Y] = true;
+
+            List<Unit> bestPositions = new List<Unit>();
+            while (queue.Any())
+            {
+                var current = queue.Dequeue();
+
+                if (current.Distance == 1)
+                {
+                    Unit temp = current;
+                    List<Unit> output = new List<Unit>();
+                    while (temp.Parent != null)
+                    {
+                        output.Add(temp);
+                        temp = temp.Parent;
+                    }
+                    bestPositions.Add(output.Last());
+                }
+
+                var walkable = WalkableCoordinates(grid, current);
+                List<Unit> nextCoordinates = new List<Unit>();
+                foreach (var next in walkable)
+                {
+                    if (!isVisited[next.X, next.Y])
+                    {
+                        isVisited[next.X, next.Y] = true;
+                        next.Parent = current;
+                        next.Cost = current.Cost + 1;
+                        next.Distance = CalculateManhattenDistance(next.X, next.Y, target.X, target.Y);
+                        next.Type = current.Type;
+                        nextCoordinates.Add(next);
+                    }
+                }
+
+                if (nextCoordinates.Count > 0)
+                {
+                    foreach (var next in nextCoordinates.OrderBy(t => t.Distance).ThenBy(t => t.X).ThenBy(t => t.Y))
+                    {
+                        queue.Enqueue(next);
+                    }
+                }
+            }
+
+            return bestPositions.Count > 0 ? bestPositions.OrderBy(t => t.X).ThenBy(t => t.Y).First() : null;
+        }
+
+        private Unit AStar(char[][] grid, Unit start, Unit target)
+        {
+            Dictionary<Unit, Unit> cameFrom = new Dictionary<Unit, Unit>();
+            Dictionary<Unit, int> costSoFar = new Dictionary<Unit, int>();
+
+            start.Cost = 0;
+            start.Distance = CalculateManhattenDistance(start.X, start.Y, target.X, target.Y);
+            start.Priority = 0;
+            start.Parent = null;
+
+            HashSet<(int X, int Y)> isVisited = new HashSet<(int X, int Y)>();
+            PriorityQueue<Unit> queue = new PriorityQueue<Unit>();
             queue.Enqueue(start);
             cameFrom[start] = start;
             costSoFar[start] = 0;
+            isVisited.Add((start.X, start.Y));
 
-            isVisited[start.X, start.Y] = true;
-
-            List<Tile> ans = new List<Tile>();
+            List<Unit> bestPositions = new List<Unit>();
             while (queue.Count() > 0)
             {
                 var current = queue.Dequeue();
 
-                if (current.X == target.X && current.Y == target.Y)
+                if (current.Distance == 1)
                 {
-                    var temp = current;
-                    List<Tile> output = new List<Tile>();
+                    Unit temp = current;
+                    List<Unit> output = new List<Unit>();
                     while (temp.Parent != null)
                     {
-                        output.Add(temp);                        
-                        temp = temp.Parent;                        
+                        output.Add(temp);
+                        temp = temp.Parent;
                     }
+
                     var last = output.Last();
-                    if (ans.Contains(last))
+                    if (bestPositions.Contains(last))
                     {
-                        return ans.OrderBy(t => t.X).ThenBy(t => t.Y).First();
+                        return bestPositions.OrderBy(t => t.X).ThenBy(t => t.Y).First();
                     }
                     else
                     {
-                        ans.Add(last);
+                        bestPositions.Add(last);
                     }
                 }
 
-                var walkable = WalkablePositions(grid, current);
+                var walkable = WalkableCoordinates(grid, current);
                 foreach (var next in walkable)
                 {
-                    double newCost = costSoFar[current] + (isVisited[next.X, next.Y] ? 5 : 1);
-
+                    int newCost = costSoFar[current] + (isVisited.Contains((next.X, next.Y)) ? 5 : 1);
                     if (!costSoFar.ContainsKey(next) || newCost < costSoFar[next])
                     {
-                        isVisited[next.X, next.Y] = true;
-                        var priority = newCost + CalculateManhattenDistance(next.X, next.Y, target.X, target.Y);
+                        isVisited.Add((next.X, next.Y));
+
+                        int distance = CalculateManhattenDistance(next.X, next.Y, target.X, target.Y);
+                        int priority = newCost + distance;
                         next.Parent = current;
-                        next.Cost = (int)newCost;
-                        next.Distance = CalculateManhattenDistance(next.X, next.Y, target.X, target.Y);
-                        next.priority = priority;
+                        next.Cost = newCost;
+                        next.Distance = distance;
+                        next.Priority = priority;
 
                         costSoFar[next] = newCost;
                         cameFrom[next] = current;
-                        queue.Enqueue(next);                        
+                        queue.Enqueue(next);
                     }
                 }
             }
@@ -265,7 +350,7 @@ namespace AdventOfCode._2018.Day15
 
         private void ReadData()
         {
-            const string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2018\Day15\input.txt";
+            const string path = @"C:\Users\bruger\Desktop\AdventOfCode2020\2018\Day15\sample2.txt";
             var lines = File.ReadAllLines(path);
 
             H = lines.Length;

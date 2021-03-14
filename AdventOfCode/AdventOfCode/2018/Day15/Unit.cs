@@ -6,37 +6,39 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode._2018.Day15
 {
-    public class Tile : IComparable<Tile>
+    public class Unit : IComparable<Unit>
     {
         public int ID;
         public int X;
         public int Y;
-        public char Value;
+        public char Type;
         public int Attack;
         public int HP;
-        public double priority; // smaller values are higher priority
+        public bool isAlive;        
 
         //A*
         public int Cost;
         public int Distance;
         public int CostDistance => Cost + Distance;
-        public Tile Parent;
+        public Unit Parent;
+        public double Priority; // smaller values are higher priority
 
-        public Tile()
+        public Unit()
         {
             Attack = 3;
             HP = 200;
         }
 
-        public Tile(double priority)
+        public Unit(double priority)
         {
-            this.priority = priority;
+            this.Priority = priority;
+            //isAlive = true;
         }
 
-        public int CompareTo(Tile other)
+        public int CompareTo(Unit other)
         {
-            if (this.priority < other.priority) return -1;
-            else if (this.priority > other.priority) return 1;
+            if (this.Priority < other.Priority) return -1;
+            else if (this.Priority > other.Priority) return 1;
             else return 0;
         }
     }
