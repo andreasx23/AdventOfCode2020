@@ -38,15 +38,18 @@ namespace AdventOfCode._2018.Day22
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            bool[,] isVisited = new bool[H, W];
-            int ans = 0;
+            int[,] count = new int[H, W];
+            //bool[,] isVisited = new bool[H, W];
+            HashSet<(int x, int y, Tool tool)> isVisited = new HashSet<(int x, int y, Tool tool)>();
+            int ans = int.MaxValue;
 
             Print(grid);
             Console.WriteLine();
 
             Queue<Coordinate> queue = new Queue<Coordinate>();
             queue.Enqueue(start);
-            isVisited[start.X, start.Y] = true;
+            //isVisited[start.X, start.Y] = true;
+            isVisited.Add((start.X, start.Y, start.Tool));
 
             while (queue.Any())
             {
@@ -54,15 +57,10 @@ namespace AdventOfCode._2018.Day22
 
                 if (current.X == target.X && current.Y == target.Y)
                 {
-                    if (current.Tool == Tool.Torch)
-                    {
-                        ans = current.Time;
-                    }
-                    else
-                    {
-                        ans = current.Time + 7;
-                    }
+                    int time = current.Time + 7;
+                    ans = Math.Min(ans, time);
 
+                    Console.WriteLine("Current path:");
                     var clone = (char[][])grid.Clone();
                     var temp = current;
                     while (temp != null)
@@ -70,59 +68,38 @@ namespace AdventOfCode._2018.Day22
                         clone[temp.X][temp.Y] = 'X';
                         temp = temp.Parent;
                     }
-
                     clone[start.X][start.Y] = start.Type;
                     clone[target.X][target.Y] = target.Type;
-
                     Print(clone);
-
-                    isVisited[current.X, current.Y] = false;
-                    ans = Math.Max(ans, current.Time);
-
-                    queue.Clear();
+                    Console.WriteLine();
+                    continue;
                 }
 
-                //var clone = (char[][])grid.Clone();
-                //clone[current.X][current.Y] = 'X';
-                //Print(clone);
-                //Console.WriteLine();
-
-                List<Coordinate> validCoordinates = ValidCoordinates(grid, current, isVisited);
-                List<Coordinate> Passable = new List<Coordinate>();
+                List<Coordinate> validCoordinates = ValidCoordinates(grid, current);
                 foreach (var next in validCoordinates)
                 {
-                    next.Tool = current.Tool;
                     next.Parent = current;
 
-                    if (!isVisited[next.X, next.Y] && CanPass(grid, next))
+                    foreach (var tool in (Tool[])Enum.GetValues(typeof(Tool)))
                     {
-                        //isVisited[next.X, next.Y] = true;
-                        Passable.Add(next);
-                    }
-                }
+                        next.Tool = tool;
+                        if (isVisited.Contains((next.X, next.Y, next.Tool)))
+                        {
+                            continue;
+                        }
 
-                if (Passable.Count > 0)
-                {
-                    foreach (var next in Passable)
-                    {
-                        isVisited[next.X, next.Y] = true;
-                        next.Time = current.Time + 1;
-                        queue.Enqueue(next);
+                        isVisited.Add((next.X, next.Y, next.Tool));
+                        if (CanPass(grid, next))
+                        {
+                            next.Time = current.Time + 1;
+                        }
+                        else
+                        {
+                            next.Time = current.Time + 7;
+                        }
+
+                        queue.Enqueue(new Coordinate() { X = next.X, Y = next.Y, Parent = next.Parent, Time = next.Time, Tool = next.Tool });
                     }
-                }
-                else
-                {
-                    //TODO - change equipment
-                    Random rand = new Random();
-                    Array tools = Enum.GetValues(typeof(Tool));
-                    Tool currentTool = current.Tool;
-                    current.Time += 7;
-                    current.Tool = (Tool)tools.GetValue(rand.Next(tools.Length));
-                    while (current.Tool == currentTool)
-                    {
-                        current.Tool = (Tool)tools.GetValue(rand.Next(tools.Length));
-                    }
-                    queue.Enqueue(current);
                 }
             }
 
@@ -133,7 +110,7 @@ namespace AdventOfCode._2018.Day22
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
         }
 
-        private List<Coordinate> ValidCoordinates(char[][] grid, Coordinate current, bool[,] isVisited)
+        private List<Coordinate> ValidCoordinates(char[][] grid, Coordinate current)
         {
             List<Coordinate> directions = new List<Coordinate>()
             {
@@ -149,7 +126,7 @@ namespace AdventOfCode._2018.Day22
                 coordinate.X += current.X;
                 coordinate.Y += current.Y;
 
-                if (coordinate.X < 0 || coordinate.X >= grid.Length || coordinate.Y < 0 || coordinate.Y >= grid[0].Length || isVisited[coordinate.X, coordinate.Y])
+                if (coordinate.X < 0 || coordinate.X >= grid.Length || coordinate.Y < 0 || coordinate.Y >= grid[0].Length)
                 {
                     continue;
                 }
@@ -157,8 +134,24 @@ namespace AdventOfCode._2018.Day22
                 validCoordinates.Add(coordinate);
             }
 
-
             return validCoordinates;
+        }
+
+        private List<Tool> ToolSelecter(char[][] grid, Coordinate current)
+        {
+            var type = grid[current.X][current.Y];
+            if (type == '.')
+            {
+                return new List<Tool>() { Tool.Torch, Tool.ClimbingGear };
+            }
+            else if (type == '=')
+            {
+                return new List<Tool>() { Tool.ClimbingGear, Tool.Neither };
+            }
+            else
+            {
+                return new List<Tool>() { Tool.Torch, Tool.Neither };
+            }
         }
 
         private bool CanPass(char[][] grid, Coordinate current)
@@ -190,7 +183,7 @@ namespace AdventOfCode._2018.Day22
 
         private void ReadData()
         {
-            const string path = @"C:\Users\Andreas\Desktop\AdventOfCode2020\2018\Day22\sample.txt";
+            const string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2018\Day22\sample.txt";
             var lines = File.ReadAllLines(path);
             var first = lines[0].Split(' ');
             var depth = int.Parse(first[1]);
