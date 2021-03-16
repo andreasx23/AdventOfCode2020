@@ -12,14 +12,12 @@ namespace AdventOfCode._2016.Day01
     {
         private readonly List<(char direction, int amount)> input = new List<(char direction, int amount)>();
 
-        //https://adventofcode.com/2016/day/1
         private void Day1()
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            string dirs = "NESW";
-            int east = 0, north = 0;
+            int north = 0, east = 0;
             int dir = 0;
             foreach (var (direction, amount) in input)
             {
@@ -41,42 +39,42 @@ namespace AdventOfCode._2016.Day01
                     dir = 0;
                 }
 
-                if (dir == 0)
+                switch (dir)
                 {
-                    north += amount;
+                    case 0:
+                        north += amount;
+                        break;
+                    case 1:
+                        east += amount;
+                        break;
+                    case 2:
+                        north -= amount;
+                        break;
+                    case 3:
+                        east -= amount;
+                        break;
+                    default:
+                        break;
                 }
-                else if (dir == 1)
-                {
-                    east += amount;
-                }
-                else if (dir == 2)
-                {
-                    north -= amount;
-                }
-                else
-                {
-                    east -= amount;
-                }
-
-                Console.WriteLine(east + " " + north);
             }
 
-            Console.WriteLine(east + " " + north);
+            int ans = Math.Abs(north) + Math.Abs(east);
 
-            int ans = east + north;
             watch.Stop();
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
         }
 
         private void ReadData()
         {
-            string path = @"C:\Users\Andreas\Desktop\AdventOfCode2020\2016\Day01\sample.txt";
-            var lines = File.ReadAllLines(path).Select(s => s.Split(',').Select(s => s.Trim())).ToList();
+            string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2016\Day01\input.txt";
+            var lines = File.ReadAllLines(path)[0].Split(',').Select(s => s.Trim()).ToList();
 
-            foreach (var instructions in lines[0])
+            foreach (var instructions in lines)
             {
+                Console.WriteLine(instructions);
+
                 char dir = instructions[0];
-                int amount = Convert.ToInt32(instructions[1].ToString());
+                int amount = Convert.ToInt32(instructions.Substring(1));
                 input.Add((dir, amount));
             }
         }
