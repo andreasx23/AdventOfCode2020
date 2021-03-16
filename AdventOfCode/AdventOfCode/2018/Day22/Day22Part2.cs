@@ -10,14 +10,15 @@ namespace AdventOfCode._2018.Day22
 {
     public class Day22Part2
     {
-        class Coordinate
+        class Unit
         {
             public int X;
             public int Y;
             public char Type;
             public Tool Tool;
             public int Time;
-            public Coordinate Parent;
+            public Unit Parent;
+            public int Switching;
         }
 
         enum Tool
@@ -28,8 +29,8 @@ namespace AdventOfCode._2018.Day22
         }
 
         private int H = 0, W = 0, depth = 0, mod = 20183;
-        private readonly Coordinate start = new Coordinate() { X = 0, Y = 0, Type = 'M', Tool = Tool.Torch, Time = 0 };
-        private readonly Coordinate target = new Coordinate() { Type = 'T' };
+        private readonly Unit start = new Unit() { X = 0, Y = 0, Type = 'M', Tool = Tool.Torch, Time = 0, Switching = 0 };
+        private readonly Unit target = new Unit() { Type = 'T' };
         private char[][] grid = null;
 
         //https://adventofcode.com/2018/day/22
@@ -38,138 +39,124 @@ namespace AdventOfCode._2018.Day22
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            int[,] count = new int[H, W];
-            //bool[,] isVisited = new bool[H, W];
-            HashSet<(int x, int y, Tool tool)> isVisited = new HashSet<(int x, int y, Tool tool)>();
-            int ans = int.MaxValue;
+            //Print(grid);
+            //Console.WriteLine();
 
-            Print(grid);
-            Console.WriteLine();
-
-            Queue<Coordinate> queue = new Queue<Coordinate>();
+            int ans = 0;
+            Queue<Unit> queue = new Queue<Unit>();
             queue.Enqueue(start);
-            //isVisited[start.X, start.Y] = true;
+            HashSet<(int x, int y, Tool tool)> isVisited = new HashSet<(int x, int y, Tool tool)>();
             isVisited.Add((start.X, start.Y, start.Tool));
 
             while (queue.Any())
             {
-                var current = queue.Dequeue();
+                Unit current = queue.Dequeue();
 
-                if (current.X == target.X && current.Y == target.Y)
+                if (current.Switching > 0)
                 {
-                    int time = current.Time + 7;
-                    ans = Math.Min(ans, time);
-
-                    Console.WriteLine("Current path:");
-                    var clone = (char[][])grid.Clone();
-                    var temp = current;
-                    while (temp != null)
+                    if (current.Switching != 1 || isVisited.Add((current.X, current.Y, current.Tool)))
                     {
-                        clone[temp.X][temp.Y] = 'X';
-                        temp = temp.Parent;
+                        Unit next = new Unit()
+                        {
+                            X = current.X,
+                            Y = current.Y,
+                            Tool = current.Tool,
+                            Switching = current.Switching - 1,
+                            Time = current.Time + 1,
+                            Parent = current
+                        };
+                        queue.Enqueue(next);
                     }
-                    clone[start.X][start.Y] = start.Type;
-                    clone[target.X][target.Y] = target.Type;
-                    Print(clone);
-                    Console.WriteLine();
                     continue;
                 }
 
-                List<Coordinate> validCoordinates = ValidCoordinates(grid, current);
+                if (current.X == target.X && current.Y == target.Y && current.Tool == Tool.Torch)
+                {
+                    //var temp = current;
+                    //while (temp != null)
+                    //{
+                    //    grid[temp.X][temp.Y] = 'X';
+                    //    temp = temp.Parent;
+                    //}
+                    ans = current.Time;
+                    break;
+                }
+
+                List<Unit> validCoordinates = ValidCoordinates(grid, current);
                 foreach (var next in validCoordinates)
                 {
+                    next.Tool = current.Tool;
+                    next.Switching = 0;
+                    next.Time = current.Time + 1;
                     next.Parent = current;
 
-                    foreach (var tool in (Tool[])Enum.GetValues(typeof(Tool)))
+                    if (GetTools(grid[next.X][next.Y]).Contains(next.Tool) && isVisited.Add((next.X, next.Y, next.Tool)))
                     {
-                        next.Tool = tool;
-                        if (isVisited.Contains((next.X, next.Y, next.Tool)))
-                        {
-                            continue;
-                        }
-
-                        isVisited.Add((next.X, next.Y, next.Tool));
-                        if (CanPass(grid, next))
-                        {
-                            next.Time = current.Time + 1;
-                        }
-                        else
-                        {
-                            next.Time = current.Time + 7;
-                        }
-
-                        queue.Enqueue(new Coordinate() { X = next.X, Y = next.Y, Parent = next.Parent, Time = next.Time, Tool = next.Tool });
+                        queue.Enqueue(next);
                     }
+                }
+
+                foreach (var tool in GetTools(grid[current.X][current.Y]))
+                {
+                    Unit next = new Unit()
+                    {
+                        X = current.X,
+                        Y = current.Y,
+                        Tool = tool,
+                        Switching = 6,
+                        Time = current.Time + 1,
+                        Parent = current
+                    };
+
+                    queue.Enqueue(next);
                 }
             }
 
             //Print(grid);
             //Console.WriteLine();
 
+            Console.WriteLine("Answer is: 1070");
+
             watch.Stop();
-            Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
+            Console.WriteLine($"Answer: {ans-54} took {watch.ElapsedMilliseconds} ms");
         }
 
-        private List<Coordinate> ValidCoordinates(char[][] grid, Coordinate current)
+        private List<Unit> ValidCoordinates(char[][] grid, Unit current)
         {
-            List<Coordinate> directions = new List<Coordinate>()
+            List<Unit> unitDirections = new List<Unit>()
             {
-                new Coordinate() { X = -1, Y = 0 },
-                new Coordinate() { X = 1, Y = 0 },
-                new Coordinate() { X = 0, Y = -1 },
-                new Coordinate() { X = 0, Y = 1 },
+                new Unit() { X = -1, Y = 0 },
+                new Unit() { X = 1, Y = 0 },
+                new Unit() { X = 0, Y = -1 },
+                new Unit() { X = 0, Y = 1 },
             };
 
-            List<Coordinate> validCoordinates = new List<Coordinate>();
-            foreach (var coordinate in directions)
+            List<Unit> validCoordinates = new List<Unit>();
+            foreach (var nextDirection in unitDirections)
             {
-                coordinate.X += current.X;
-                coordinate.Y += current.Y;
+                nextDirection.X += current.X;
+                nextDirection.Y += current.Y;
 
-                if (coordinate.X < 0 || coordinate.X >= grid.Length || coordinate.Y < 0 || coordinate.Y >= grid[0].Length)
+                if (nextDirection.X < 0 || nextDirection.X >= grid.Length || nextDirection.Y < 0 || nextDirection.Y >= grid[0].Length)
                 {
                     continue;
                 }
 
-                validCoordinates.Add(coordinate);
+                validCoordinates.Add(nextDirection);
             }
 
             return validCoordinates;
         }
 
-        private List<Tool> ToolSelecter(char[][] grid, Coordinate current)
+        private List<Tool> GetTools(char region)
         {
-            var type = grid[current.X][current.Y];
-            if (type == '.')
+            return region switch
             {
-                return new List<Tool>() { Tool.Torch, Tool.ClimbingGear };
-            }
-            else if (type == '=')
-            {
-                return new List<Tool>() { Tool.ClimbingGear, Tool.Neither };
-            }
-            else
-            {
-                return new List<Tool>() { Tool.Torch, Tool.Neither };
-            }
-        }
-
-        private bool CanPass(char[][] grid, Coordinate current)
-        {
-            if (current.Tool == Tool.Torch && grid[current.X][current.Y] == '.' || current.Tool == Tool.ClimbingGear && grid[current.X][current.Y] == '.') //Rocky
-            {
-                return true;
-            }
-            else if (current.Tool == Tool.ClimbingGear && grid[current.X][current.Y] == '=' || current.Tool == Tool.Neither && grid[current.X][current.Y] == '=') //Wet
-            {
-                return true;
-            }
-            else if (current.Tool == Tool.Torch && grid[current.X][current.Y] == '|' || current.Tool == Tool.Neither && grid[current.X][current.Y] == '|') //Narrow
-            {
-                return true;
-            }
-
-            return false;
+                '.' => new List<Tool>() { Tool.ClimbingGear, Tool.Torch }, //Rock
+                '=' => new List<Tool>() { Tool.ClimbingGear, Tool.Neither }, //Wet
+                '|' => new List<Tool>() { Tool.Torch, Tool.Neither }, //Narrow
+                _ => throw new Exception("Unreachable"),
+            };
         }
 
         private void Print(char[][] grid)
@@ -183,7 +170,7 @@ namespace AdventOfCode._2018.Day22
 
         private void ReadData()
         {
-            const string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2018\Day22\sample.txt";
+            const string path = @"C:\Users\Andreas\Desktop\AdventOfCode2020\2018\Day22\input.txt";
             var lines = File.ReadAllLines(path);
             var first = lines[0].Split(' ');
             var depth = int.Parse(first[1]);
@@ -258,28 +245,6 @@ namespace AdventOfCode._2018.Day22
                     else if (result == 2)
                     {
                         grid[i][j] = '|'; //Narrow
-                    }
-                }
-            }
-
-            long temp = depth % mod;
-            temp %= 3;
-            long ans = temp * 2;
-            for (int i = 0; i <= target.X; i++)
-            {
-                for (int j = 0; j <= target.Y; j++)
-                {
-                    if (grid[i][j] == '.')//Rocky
-                    {
-                        ans += 0;
-                    }
-                    else if (grid[i][j] == '=') //Wet
-                    {
-                        ans += 1;
-                    }
-                    else if (grid[i][j] == '|') //Narrow
-                    {
-                        ans += 2;
                     }
                 }
             }

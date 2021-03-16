@@ -126,8 +126,8 @@ namespace AdventOfCode._2018.Day22
             //grid[start.X][start.Y] = start.Type;
             //grid[target.X][target.Y] = target.Type;
 
-            Print(grid);
-            Console.WriteLine();
+            //Print(grid);
+            //Console.WriteLine();
 
             watch.Stop();
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
@@ -144,7 +144,7 @@ namespace AdventOfCode._2018.Day22
 
         private void ReadData()
         {
-            const string path = @"C:\Users\bruger\Desktop\AdventOfCode2020\2018\Day22\input.txt";
+            const string path = @"C:\Users\Andreas\Desktop\AdventOfCode2020\2018\Day22\input.txt";
             var lines = File.ReadAllLines(path);
             var first = lines[0].Split(' ');
             var depth = int.Parse(first[1]);
@@ -154,15 +154,6 @@ namespace AdventOfCode._2018.Day22
             var Y = int.Parse(second[0]);
             target.X = X;
             target.Y = Y;
-
-            string path2 = @"C:\Users\bruger\Desktop\AdventOfCode2020\2018\Day22\output.txt";
-            lines = File.ReadAllLines(path2);
-            int index = 0;
-            foreach (var item in lines)
-            {
-                Console.WriteLine($"{index++} {item}");
-            }
-            Console.WriteLine();
         }
 
         public void TestCase()

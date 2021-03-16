@@ -72,7 +72,7 @@ namespace AdventOfCode._2019.Day03
                         isVisited[i, j] = true;
                     }
 
-                    grid[i, j] = (IsX(i, j)) ? 'X' : '+';
+                    grid[i, j] = (IsIntersection(i, j)) ? 'X' : '+';
                 }
             }
 
@@ -81,7 +81,7 @@ namespace AdventOfCode._2019.Day03
             {
                 for (int initJ = 0; initJ < width; initJ++)
                 {
-                    if (IsX(initI, initJ))
+                    if (IsIntersection(initI, initJ))
                     {
                         grid[initI, initJ] = 'X';
                         postions.Add((initI, initJ));
@@ -104,7 +104,7 @@ namespace AdventOfCode._2019.Day03
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
         }
 
-        private bool IsX(int i, int j)
+        private bool IsIntersection(int i, int j)
         {
             return isVisited[i, j] && 
                    isVisited[i - 1, j] && 
@@ -115,15 +115,10 @@ namespace AdventOfCode._2019.Day03
 
         private void Print()
         {
-            for (int i = 0; i < height; i++)
+            foreach (var item in grid)
             {
-                for (int j = 0; j < width; j++)
-                {
-                    Console.Write(grid[i, j] + " ");
-                }
-                Console.WriteLine();
+                Console.WriteLine(string.Join("", item));
             }
-            Console.WriteLine();
         }
 
         private void ReadData()
@@ -141,12 +136,10 @@ namespace AdventOfCode._2019.Day03
                     char c = move[0];
                     if (c == 'R' || c == 'L')
                     {
-                        //width = Math.Max(width, int.Parse(move.Substring(1)));
                         width += int.Parse(move.Substring(1));
                     }
                     else
                     {
-                        //height = Math.Max(height, int.Parse(move.Substring(1)));
                         height += int.Parse(move.Substring(1));
                     }
                     toAdd.Add(move);

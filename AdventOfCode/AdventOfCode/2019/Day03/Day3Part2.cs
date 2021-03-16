@@ -226,12 +226,10 @@ namespace AdventOfCode._2019.Day03
 
                     if (direction == 'R' || direction == 'L')
                     {
-                        //width += distance;
                         width = Math.Max(width, distance);
                     }
                     else
                     {
-
                         height = Math.Max(height, distance);
                     }
                     toAdd.Add(instruction);
