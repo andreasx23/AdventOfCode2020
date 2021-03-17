@@ -50,6 +50,11 @@
   <ItemGroup>
     <Compile Include="2016\Day01\Day1Part1.cs" />
     <Compile Include="2016\Day01\Day1Part2.cs" />
+    <Compile Include="2016\Day02\Day2Part1.cs" />
+    <Compile Include="2016\Day02\Day2Part2.cs" />
+    <Compile Include="2016\Day03\Day3Part1.cs" />
+    <Compile Include="2016\Day03\Day3Part2.cs" />
+    <Compile Include="2016\Day04\Day4Part1.cs" />
     <Compile Include="2018\Day01\Day1Part1.cs" />
     <Compile Include="2018\Day01\Day1Part2.cs" />
     <Compile Include="2018\Day02\Day2Part1.cs" />
