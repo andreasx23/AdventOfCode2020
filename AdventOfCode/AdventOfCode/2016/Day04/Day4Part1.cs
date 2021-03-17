@@ -12,7 +12,6 @@ namespace AdventOfCode._2016.Day04
     {
         private readonly Dictionary<string, string> map = new Dictionary<string, string>();
 
-        //https://adventofcode.com/2016/day/4
         private void Day4()
         {
             Stopwatch watch = new Stopwatch();
@@ -24,7 +23,7 @@ namespace AdventOfCode._2016.Day04
                 Dictionary<char, int> count = new Dictionary<char, int>();
                 foreach (var c in kv.Key)
                 {
-                    if (c == '-')
+                    if (c == '-' || char.IsDigit(c))
                     {
                         continue;
                     }
@@ -36,14 +35,13 @@ namespace AdventOfCode._2016.Day04
                     count[c]++;
                 }
 
-                var order = count.OrderByDescending(kv => kv.Value).Take(5).Select(kv => kv.Key).ToList();
-
+                var order = count.OrderByDescending(kv => kv.Value).ThenBy(kv => kv.Key).Take(5).Select(kv => kv.Key).ToList();
+                
                 bool isValid = true;
                 for (int i = 0; i < 5; i++)
                 {
                     if (kv.Value[i] != order[i])
-                    {
-                        Console.WriteLine(kv.Value[i] + " " + order[i]);
+                    {                        
                         isValid = false;
                         break;
                     }
@@ -62,14 +60,13 @@ namespace AdventOfCode._2016.Day04
 
         private void ReadData()
         {
-            string path = @"C:\Users\Andreas\Desktop\AdventOfCode2020\2016\Day04\sample.txt";
+            string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2016\Day04\input.txt";
             var lines = File.ReadAllLines(path);
 
-            //ide-htrgti-gpqqxi-rjhidbtg-htgkxrt-193[gynxm]
-            foreach (var item in lines)
+            foreach (var s in lines)
             {
-                var key = item.Substring(0, item.Length - 7);
-                var value = item.Substring(item.Length - 7);
+                var key = s.Substring(0, s.Length - 7);
+                var value = s.Substring(s.Length - 7);
                 value = value.Substring(1, value.Length - 2);
                 map.Add(key, value);
             }
