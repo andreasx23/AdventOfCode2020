@@ -62,6 +62,10 @@
     <Compile Include="2016\Day06\Day6Part1.cs" />
     <Compile Include="2016\Day06\Day6Part2.cs" />
     <Compile Include="2016\Day07\Day7Part1.cs" />
+    <Compile Include="2016\Day07\Day7Part2.cs" />
+    <Compile Include="2016\Day08\Day8Part1.cs" />
+    <Compile Include="2016\Day08\Day8Part2.cs" />
+    <Compile Include="2016\Day08\Entity.cs" />
     <Compile Include="2018\Day01\Day1Part1.cs" />
     <Compile Include="2018\Day01\Day1Part2.cs" />
     <Compile Include="2018\Day02\Day2Part1.cs" />

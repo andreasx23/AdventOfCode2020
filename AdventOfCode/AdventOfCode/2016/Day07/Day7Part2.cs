@@ -12,7 +12,6 @@ namespace AdventOfCode._2016.Day07
     {
         private readonly Dictionary<List<string>, List<string>> map = new Dictionary<List<string>, List<string>>();
 
-        //https://adventofcode.com/2016/day/7#part2
         private void Day7()
         {
             Stopwatch watch = new Stopwatch();
@@ -21,13 +20,14 @@ namespace AdventOfCode._2016.Day07
             int ans = 0;
             foreach (var kv in map)
             {
-                bool hypernetContainsPalindrome = false;
+                HashSet<string> abas = new HashSet<string>();
+                HashSet<string> babs = new HashSet<string>();
                 foreach (var hypernet in kv.Value)
                 {
-                    for (int i = 0; i < hypernet.Length - 3; i++)
+                    for (int i = 0; i < hypernet.Length - 2; i++)
                     {
                         StringBuilder sb = new StringBuilder();
-                        for (int j = 0; j < 4; j++)
+                        for (int j = 0; j < 3; j++)
                         {
                             sb.Append(hypernet[j + i]);
                         }
@@ -35,18 +35,14 @@ namespace AdventOfCode._2016.Day07
                         string temp = sb.ToString();
                         if (!temp.All(t => t == temp[0]) && IsPalindrome(temp))
                         {
-                            hypernetContainsPalindrome = true;
-                            break;
+                            babs.Add(temp);
+                            string aba = temp[1].ToString() + temp[0].ToString() + temp[1].ToString();
+                            abas.Add(aba);
                         }
-                    }
-
-                    if (hypernetContainsPalindrome)
-                    {
-                        break;
                     }
                 }
 
-                if (hypernetContainsPalindrome)
+                if (babs.Count == 0)
                 {
                     continue;
                 }
@@ -54,16 +50,16 @@ namespace AdventOfCode._2016.Day07
                 bool ipv7ContainsPalindrome = false;
                 foreach (var ipv7 in kv.Key)
                 {
-                    for (int i = 0; i < ipv7.Length - 3; i++)
+                    for (int i = 0; i < ipv7.Length - 2; i++)
                     {
                         StringBuilder sb = new StringBuilder();
-                        for (int j = 0; j < 4; j++)
+                        for (int j = 0; j < 3; j++)
                         {
                             sb.Append(ipv7[j + i]);
                         }
 
                         string temp = sb.ToString();
-                        if (!temp.All(t => t == temp[0]) && IsPalindrome(temp))
+                        if (!temp.All(t => t == temp[0]) && IsPalindrome(temp) && abas.Contains(temp))
                         {
                             ipv7ContainsPalindrome = true;
                             break;
@@ -106,7 +102,7 @@ namespace AdventOfCode._2016.Day07
 
         private void ReadData()
         {
-            string path = @"C:\Users\Andreas\Desktop\AdventOfCode2020\2016\Day07\input.txt";
+            string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2016\Day07\input.txt";
             var lines = File.ReadAllLines(path).ToList();
 
             foreach (var s in lines)
