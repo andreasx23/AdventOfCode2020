@@ -9,11 +9,11 @@ namespace AdventOfCode._2016.Day08
     public class Entity
     {
         internal Type Type { get; set; }
-        public int a;
-        public int b;
-        public int amount;
-        public int row;
-        public int column;
+        public int A;
+        public int B;
+        public int Amount;
+        public int Row;
+        public int Column;
     }
 
     enum Type

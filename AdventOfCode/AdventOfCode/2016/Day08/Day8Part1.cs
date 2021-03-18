@@ -32,15 +32,15 @@ namespace AdventOfCode._2016.Day08
             {
                 if (entity.Type == Type.rect)
                 {
-                    grid = RectAxB(grid, entity.a, entity.b);
+                    grid = RectAxB(grid, entity.A, entity.B);
                 }
                 else if (entity.Type == Type.row)
                 {
-                    grid = RotateRow(grid, entity.row, entity.amount);
+                    grid = RotateRow(grid, entity.Row, entity.Amount);
                 }
                 else
                 {
-                    grid = RotateColumn(grid, entity.column, entity.amount);
+                    grid = RotateColumn(grid, entity.Column, entity.Amount);
                 }
             }
 
@@ -137,24 +137,24 @@ namespace AdventOfCode._2016.Day08
                     temp = s.Replace("rect ", "");
                     List<int> split = temp.Split('x').Select(int.Parse).ToList();
                     current.Type = Type.rect;
-                    current.a = split[0];
-                    current.b = split[1];                    
+                    current.A = split[0];
+                    current.B = split[1];                    
                 }
                 else if (s.Contains("row"))
                 {
                     temp = s.Replace("rotate row y=", "");
                     List<int> split = temp.Split(new string[] { " by " }, StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
                     current.Type = Type.row;
-                    current.row = split[0];
-                    current.amount = split[1];
+                    current.Row = split[0];
+                    current.Amount = split[1];
                 }
                 else if (s.Contains("column"))
                 {
                     temp = s.Replace("rotate column x=", "");
                     List<int> split = temp.Split(new string[] { " by " }, StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
                     current.Type = Type.column;
-                    current.column = split[0];
-                    current.amount = split[1];
+                    current.Column = split[0];
+                    current.Amount = split[1];
                 }
                 input.Add(current);
             }
