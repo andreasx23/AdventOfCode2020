@@ -59,6 +59,9 @@
     <Compile Include="2016\Day05\Day5Part1.cs" />
     <Compile Include="2016\Day05\Day5Part2.cs" />
     <Compile Include="2016\Day05\MD5Hash.cs" />
+    <Compile Include="2016\Day06\Day6Part1.cs" />
+    <Compile Include="2016\Day06\Day6Part2.cs" />
+    <Compile Include="2016\Day07\Day7Part1.cs" />
     <Compile Include="2018\Day01\Day1Part1.cs" />
     <Compile Include="2018\Day01\Day1Part2.cs" />
     <Compile Include="2018\Day02\Day2Part1.cs" />
