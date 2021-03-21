@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace AdventOfCode._2016.Day13
 {
-    public class Day13Part1
+    public class Day13Part2
     {
         private static readonly bool isSample = false;
         private readonly int input = (isSample) ? 10 : 1350;
@@ -40,22 +39,14 @@ namespace AdventOfCode._2016.Day13
 
             Queue<Tile> queue = new Queue<Tile>();
             Tile start = new Tile() { X = 1, Y = 1, Cost = 0 };
-            start.CalculateManhattenDistance(start.X, start.Y);
-            Tile target = new Tile() { X = (isSample) ? 4 : 39, Y = (isSample) ? 7 : 31 };
             queue.Enqueue(start);
             bool[,] isVisited = new bool[width, height];
             isVisited[start.X, start.Y] = true;
 
-            int ans = 0;
+            int ans = 1;
             while (queue.Any())
             {
                 Tile current = queue.Dequeue();
-
-                if (current.X == target.X && current.Y == target.Y)
-                {
-                    ans = current.Cost;
-                    break;
-                }
 
                 var walkable = Walkable(grid, current);
                 foreach (var next in walkable)
@@ -63,16 +54,20 @@ namespace AdventOfCode._2016.Day13
                     if (!isVisited[next.X, next.Y])
                     {
                         isVisited[next.X, next.Y] = true;
-                        next.CalculateManhattenDistance(target.X, target.Y);
                         next.Parent = current;
                         next.Cost = current.Cost + 1;
-                        queue.Enqueue(next);
+
+                        if (next.Cost <= 50)
+                        {
+                            ans++;
+                            queue.Enqueue(next);
+                        }
                     }
                 }
             }
 
             //Print(grid);
-                        
+
             watch.Stop();
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
         }
