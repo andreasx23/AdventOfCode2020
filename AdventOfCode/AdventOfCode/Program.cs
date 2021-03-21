@@ -8,6 +8,7 @@ using AdventOfCode._2016.Day07;
 using AdventOfCode._2016.Day08;
 using AdventOfCode._2016.Day09;
 using AdventOfCode._2016.Day10;
+using AdventOfCode._2016.Day11;
 
 namespace AdventOfCode
 {
@@ -15,7 +16,7 @@ namespace AdventOfCode
     {
         public static void Main(string[] args)
         {
-            Day10Part1 d = new Day10Part1();
+            Day11Part1 d = new Day11Part1();
             d.TestCase();
         }
     }

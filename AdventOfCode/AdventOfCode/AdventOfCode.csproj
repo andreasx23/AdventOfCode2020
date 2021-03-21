@@ -71,6 +71,7 @@
     <Compile Include="2016\Day10\Bot.cs" />
     <Compile Include="2016\Day10\Day10Part1.cs" />
     <Compile Include="2016\Day10\Day10Part2.cs" />
+    <Compile Include="2016\Day11\Day11Part1.cs" />
     <Compile Include="2018\Day01\Day1Part1.cs" />
     <Compile Include="2018\Day01\Day1Part2.cs" />
     <Compile Include="2018\Day02\Day2Part1.cs" />
