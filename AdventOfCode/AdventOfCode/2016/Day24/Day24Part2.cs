@@ -36,26 +36,24 @@ namespace AdventOfCode._2016.Day24
                 }
             }
 
-            var permutations = GetPermutations(Enumerable.Range(1, 7), 7);
-
-            List<List<int>> test = new List<List<int>>();
-            foreach (var item in permutations)
+            List<List<int>> permutations = new List<List<int>>();
+            foreach (var permutation in GetPermutations(Enumerable.Range(1, 7), 7))
             {
-                var list = item.ToList();
+                var list = permutation.ToList();
                 list.Add(0);
-                test.Add(list);
+                permutations.Add(list);
             }
 
             int ans = int.MaxValue, index = 0;
-            Parallel.ForEach(test, targets =>
+            Parallel.ForEach(permutations, targets =>
             {
                 int sum = 0;
                 Tile start = tiles.First(t => t.Value == '0');
-                foreach (var value in targets)
+                foreach (var currentTargetValue in targets)
                 {
                     Queue<Tile> queue = new Queue<Tile>();
                     queue.Enqueue(start);
-                    Tile target = tiles.First(t => t.Value == Convert.ToChar(value.ToString()));
+                    Tile target = tiles.First(t => t.Value == Convert.ToChar(currentTargetValue.ToString()));
                     bool[,] isVisited = new bool[H, W];
                     while (queue.Any())
                     {
