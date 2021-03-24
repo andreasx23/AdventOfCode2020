@@ -62,6 +62,7 @@ namespace AdventOfCode._2016.Day09
                             List<(int _turns, StringBuilder section)> innerCompressions = new List<(int _turns, StringBuilder section)>();
 
                             StringBuilder currentSection = new StringBuilder();
+
                             for (int j = 0; j < compressed.Length; j++)
                             {
                                 c = compressed[j];
