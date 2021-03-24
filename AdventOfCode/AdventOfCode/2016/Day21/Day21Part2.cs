@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace AdventOfCode._2016.Day21
@@ -11,10 +12,9 @@ namespace AdventOfCode._2016.Day21
     public class Day21Part2
     {
         private static readonly bool isSample = false;
-        private readonly string input = (isSample) ? "abcde" : "abcdefgh";
+        private readonly string input = (isSample) ? "abcde" : "fbgdceah";
         private List<string> instructions = new List<string>();
 
-        //https://adventofcode.com/2016/day/21#part2 TODO
         private void Day21()
         {
             Stopwatch watch = new Stopwatch();
@@ -28,13 +28,13 @@ namespace AdventOfCode._2016.Day21
                 {
                     temp = s.Replace("swap position ", "").Replace("with position ", "");
                     List<int> split = temp.Split(' ').Select(int.Parse).ToList();
-                    ans = SwapIndexXWithIndexY(ans.ToCharArray(), split[0], split[1]);
+                    ans = SwapIndexXWithIndexY(ans.ToCharArray(), split[1], split[0]);
                 }
                 else if (s.Contains("swap letter"))
                 {
                     temp = s.Replace("swap letter ", "").Replace("with letter ", "");
                     List<char> split = temp.Split(' ').Select(char.Parse).ToList();
-                    ans = SwapLetterXWithLetterY(ans.ToCharArray(), split[0], split[1]);
+                    ans = SwapLetterXWithLetterY(ans.ToCharArray(), split[1], split[0]);
                 }
                 else if (s.Contains("reverse positions"))
                 {
@@ -45,18 +45,18 @@ namespace AdventOfCode._2016.Day21
                 else if (s.Contains("rotate left"))
                 {
                     temp = s.Replace("rotate left ", "").Replace(" step", "");
-                    ans = Rotate(ans.ToCharArray(), int.Parse(temp.First().ToString()), true);
+                    ans = Rotate(ans.ToCharArray(), int.Parse(temp.First().ToString()), false);
                 }
                 else if (s.Contains("rotate right"))
                 {
                     temp = s.Replace("rotate right ", "").Replace(" step", "");
-                    ans = Rotate(ans.ToCharArray(), int.Parse(temp.First().ToString()), false);
+                    ans = Rotate(ans.ToCharArray(), int.Parse(temp.First().ToString()), true);
                 }
                 else if (s.Contains("move position"))
                 {
                     temp = s.Replace("move position ", "").Replace("to position ", "");
                     List<int> split = temp.Split(' ').Select(int.Parse).ToList();
-                    ans = MoveIndexXToIndexY(ans.ToCharArray(), split[0], split[1]);
+                    ans = MoveIndexXToIndexY(ans.ToCharArray(), split[1], split[0]);
                 }
                 else if (s.Contains("rotate based"))
                 {
@@ -64,6 +64,8 @@ namespace AdventOfCode._2016.Day21
                     ans = RotateOfLetterX(ans.ToCharArray(), temp.Last());
                 }
             }
+
+            Console.WriteLine("bdehafgc");
 
             watch.Stop();
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
@@ -118,7 +120,56 @@ namespace AdventOfCode._2016.Day21
         {
             List<char> temp = current.ToList();
             int index = temp.IndexOf(letter);
-            return Rotate(current, (index >= 4 ? index + 2 : index + 1), false);
+
+            return Rotate(current, (index >= 4 ? index + 2 : index + 1), true);
+            /*
+             * 
+             * Position	Rotate by letter	Inverse
+                0	    rotate right 1	    rotate left   1
+                1	    rotate right 2  	rotate left   1
+                2	    rotate right 3  	rotate right 2
+                3	    rotate right 4  	rotate left   2
+                4	    rotate left   2 	rotate right 1
+                5	    rotate left   1 	rotate left   3
+                6   	no change	        no change
+                7   	rotate right 1	    rotate right 4
+             */
+
+            if (index == 0)
+            {
+                return Rotate(current, 1, true);
+            }
+            else if (index == 1)
+            {
+                return Rotate(current, 1, true);
+            }
+            else if (index == 2)
+            {
+                return Rotate(current, 2, false);
+            }
+            else if (index == 3)
+            {
+                return Rotate(current, 2, true);
+            }
+            else if (index == 4)
+            {
+                return Rotate(current, 1, false);
+            }
+            else if (index == 5)
+            {
+                return Rotate(current, 3, true);
+            }
+            else if (index == 6)
+            {
+                return new string(current);
+            }
+            else if (index == 7)
+            {
+                return Rotate(current, 4, false);
+            }
+
+            return null;
+            //return Rotate(current, (index >= 4 ? index + 2 : index + 1), true);
         }
 
         private string Reverse(char[] current, int x, int y)

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode._2016.Day24
 {
-    public class Day24Part1
+    public class Day24Part2
     {
         private int H = 0, W = 0;
         private char[][] grid = null;
@@ -36,53 +36,58 @@ namespace AdventOfCode._2016.Day24
                 }
             }
 
-            int ans = 0;
-            HashSet<Tile> isFinished = new HashSet<Tile>();
-            Tile start = tiles.First(t => t.Value == '0');
-            isFinished.Add(start);
-            for (int i = 0; i < tiles.Count - 1; i++)
+            var permutations = GetPermutations(Enumerable.Range(1, 7), 7);
+
+            List<List<int>> test = new List<List<int>>();
+            foreach (var item in permutations)
             {
-                Queue<Tile> queue = new Queue<Tile>();
-                queue.Enqueue(start);
+                var list = item.ToList();
+                list.Add(0);
+                test.Add(list);
+            }
 
-                int minDistance = int.MaxValue;
-                foreach (var tile in tiles)
+            int ans = int.MaxValue, index = 0;
+            Parallel.ForEach(test, targets =>
+            {
+                int sum = 0;
+                Tile start = tiles.First(t => t.Value == '0');
+                foreach (var value in targets)
                 {
-                    if (start.Value != tile.Value && !isFinished.Contains(tile))
+                    Queue<Tile> queue = new Queue<Tile>();
+                    queue.Enqueue(start);
+                    Tile target = tiles.First(t => t.Value == Convert.ToChar(value.ToString()));
+                    bool[,] isVisited = new bool[H, W];
+                    while (queue.Any())
                     {
-                        int distance = CalculateManhattenDistance(start.X, tile.X, start.Y, tile.Y);
-                        tile.Distance = distance;
-                        minDistance = Math.Min(minDistance, distance);
-                    }
-                }
-                List<Tile> targets = tiles.Where(t => !isFinished.Contains(t) && t.Distance == minDistance).ToList();
-                Tile target = targets.Last();
+                        Tile current = queue.Dequeue();
 
-                bool[,] isVisited = new bool[H, W];
-                while (queue.Any())
-                {
-                    Tile current = queue.Dequeue();
-
-                    if (current.X == target.X && current.Y == target.Y)
-                    {
-                        start = target;
-                        isFinished.Add(start);
-                        ans += current.Cost;
-                        break;
-                    }
-
-                    List<Tile> neighbours = Neighbours(current);
-                    foreach (var next in neighbours)
-                    {
-                        if (!isVisited[next.X, next.Y])
+                        if (current.X == target.X && current.Y == target.Y)
                         {
-                            isVisited[next.X, next.Y] = true;
-                            next.Cost = current.Cost + 1;
-                            queue.Enqueue(next);
+                            start = target;
+                            sum += current.Cost;
+                            break;
+                        }
+
+                        List<Tile> neighbours = Neighbours(current);
+                        foreach (var next in neighbours)
+                        {
+                            if (!isVisited[next.X, next.Y])
+                            {
+                                isVisited[next.X, next.Y] = true;
+                                next.Cost = current.Cost + 1;
+                                queue.Enqueue(next);
+                            }
                         }
                     }
                 }
-            }
+                ans = Math.Min(ans, sum);
+
+                if (index > 0 && index % 25 == 0)
+                {
+                    Console.WriteLine(ans);
+                }
+                index++;
+            });
 
             //Print();
 
@@ -120,6 +125,15 @@ namespace AdventOfCode._2016.Day24
         public int CalculateManhattenDistance(int X1, int X2, int Y1, int Y2)
         {
             return Math.Abs(X2 - X1) + Math.Abs(Y2 - Y1);
+        }
+
+        private IEnumerable<IEnumerable<T>> GetPermutations<T>(IEnumerable<T> list, int length)
+        {
+            if (length == 1) return list.Select(t => new T[] { t });
+
+            return GetPermutations(list, length - 1)
+                .SelectMany(t => list.Where(e => !t.Contains(e)),
+                    (t1, t2) => t1.Concat(new T[] { t2 }));
         }
 
         private void Print()

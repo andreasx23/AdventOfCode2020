@@ -20,7 +20,7 @@ namespace AdventOfCode
     {
         public static void Main(string[] args)
         {
-            Day24Part1 d = new Day24Part1();
+            Day24Part2 d = new Day24Part2();
             d.TestCase();
         }
     }
