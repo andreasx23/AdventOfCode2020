@@ -132,7 +132,7 @@ namespace AdventOfCode._2016.Day24
 
         private void ReadData()
         {
-            string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2016\Day24\input.txt";
+            string path = @"C:\Users\Andreas\Desktop\AdventOfCode2020\2016\Day24\input.txt";
             var lines = File.ReadAllLines(path).ToList();
 
             H = lines.Count;

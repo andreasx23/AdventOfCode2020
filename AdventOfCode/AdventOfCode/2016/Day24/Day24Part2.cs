@@ -45,7 +45,7 @@ namespace AdventOfCode._2016.Day24
             }
 
             int ans = int.MaxValue, index = 0;
-            Parallel.ForEach(permutations, targets =>
+            Parallel.ForEach(permutations, new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount }, targets =>
             {
                 int sum = 0;
                 Tile start = tiles.First(t => t.Value == '0');
@@ -80,7 +80,7 @@ namespace AdventOfCode._2016.Day24
                 }
                 ans = Math.Min(ans, sum);
 
-                if (index > 0 && index % 25 == 0)
+                if (index > 0 && index % 50 == 0)
                 {
                     Console.WriteLine(ans);
                 }
@@ -120,11 +120,6 @@ namespace AdventOfCode._2016.Day24
             return result;
         }
 
-        public int CalculateManhattenDistance(int X1, int X2, int Y1, int Y2)
-        {
-            return Math.Abs(X2 - X1) + Math.Abs(Y2 - Y1);
-        }
-
         private IEnumerable<IEnumerable<T>> GetPermutations<T>(IEnumerable<T> list, int length)
         {
             if (length == 1) return list.Select(t => new T[] { t });
@@ -144,7 +139,7 @@ namespace AdventOfCode._2016.Day24
 
         private void ReadData()
         {
-            string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2016\Day24\input.txt";
+            string path = @"C:\Users\Andreas\Desktop\AdventOfCode2020\2016\Day24\input.txt";
             var lines = File.ReadAllLines(path).ToList();
 
             H = lines.Count;
