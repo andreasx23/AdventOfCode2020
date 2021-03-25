@@ -77,6 +77,7 @@
     <Compile Include="2016\Day13\Day13Part1.cs" />
     <Compile Include="2016\Day13\Day13Part2.cs" />
     <Compile Include="2016\Day13\Tile.cs" />
+    <Compile Include="2016\Day14\Day14Part1.cs" />
     <Compile Include="2016\Day17\Day17Part1.cs" />
     <Compile Include="2016\Day17\Day17Part2.cs" />
     <Compile Include="2016\Day17\Tile.cs" />
