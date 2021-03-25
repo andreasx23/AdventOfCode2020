@@ -29,29 +29,29 @@ namespace AdventOfCode._2016.Day14
                 var triple = Regex.Match(hash, "([a-z0-9\\d])\\1\\1");
                 if (triple.Success)
                 {
-                    var firstTriple = triple.Groups[0].Value;
+                    string firstTriple = triple.Groups[0].Value;
                     founds.Add((firstTriple, index));
                 }
 
                 var fives = Regex.Match(hash, "([a-z0-9\\d])\\1\\1\\1\\1");
                 if (fives.Success)
                 {
-                    var firstFives = fives.Groups[0].Value;
-                    var lookup = new string(firstFives.Take(3).ToArray());
+                    string firstFives = fives.Groups[0].Value;
+                    string lookup = new string(firstFives.Take(3).ToArray());
 
                     var matches = founds.Where(f => f.triple.Equals(lookup) && index - f.i <= 1000 && index != f.i).ToList();
-                    foreach (var item in matches)
+                    foreach (var match in matches)
                     {
                         sum++;
 
                         if (sum >= 64)
                         {
-                            ans = item.i;
+                            ans = match.i;
                             isFinished = true;
                             break;
                         }
 
-                        founds.Remove(item);
+                        founds.Remove(match);
                     }
                 }
 
