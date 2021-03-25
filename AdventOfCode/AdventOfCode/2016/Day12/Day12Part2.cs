@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode._2016.Day12
 {
-    public class Day12Part1
+    public class Day12Part2
     {
         private List<string> input = new List<string>();
 
@@ -17,7 +17,7 @@ namespace AdventOfCode._2016.Day12
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            int a = 0, b = 0, c = 0, d = 0, i = 0;
+            int a = 0, b = 0, c = 1, d = 0, i = 0;
             bool isFinished = false;
             while (!isFinished)
             {
