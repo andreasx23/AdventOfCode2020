@@ -32,15 +32,8 @@ namespace AdventOfCode._2016.Day16
                 string sub = input.Substring(i, 2);
                 sb.Append(sub.Equals("00") || sub.Equals("11") ? '1' : '0');
             }
-            
-            if (sb.Length % 2 == 1)
-            {
-                return sb.ToString();
-            }
-            else
-            {
-                return Dissect(sb.ToString());
-            }
+
+            return sb.Length % 2 == 1 ? sb.ToString() : Dissect(sb.ToString());
         }
 
         private string DragonCurve(string a)
@@ -52,14 +45,7 @@ namespace AdventOfCode._2016.Day16
             }
 
             string current = $"{a}0{new string(b)}";
-            if (current.Length >= len)
-            {
-                return current.Substring(0, len);
-            }
-            else
-            {
-                return DragonCurve(current);
-            }
+            return current.Length >= len ? current.Substring(0, len) : DragonCurve(current);
         }
 
         private void ReadData()
