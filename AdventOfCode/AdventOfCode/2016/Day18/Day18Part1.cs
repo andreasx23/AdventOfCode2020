@@ -38,7 +38,7 @@ namespace AdventOfCode._2016.Day18
                     char middle = grid[i - 1][j];
                     char right = (j + 1 < n) ? grid[i - 1][j + 1] : (char)Value.Safe;
 
-                    grid[i][j] = IsSafeTile(left, middle, right);
+                    grid[i][j] = GetTileValue(left, middle, right);
                 }
             }
 
@@ -52,7 +52,7 @@ namespace AdventOfCode._2016.Day18
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
         }
 
-        private char IsSafeTile(char left, char middle, char right)
+        private char GetTileValue(char left, char middle, char right)
         {
             if (left == (char)Value.Trap && middle == (char)Value.Trap && right == (char)Value.Safe ||
                 left == (char)Value.Safe && middle == (char)Value.Trap && right == (char)Value.Trap ||
