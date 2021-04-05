@@ -10,14 +10,14 @@ namespace AdventOfCode._2015.Day21
 {
     public class Day21Part1
     {
-        class Entity
+        class Npc
         {
             public int Hp;
             public int Damange;
             public int Armour;
         }
 
-        class Gear
+        class Entity
         {
             public string Name;
             public int Cost;
@@ -33,7 +33,7 @@ namespace AdventOfCode._2015.Day21
             Ring = 3
         }
 
-        private readonly List<List<Gear>> gears = new List<List<Gear>>();
+        private readonly List<List<Entity>> gears = new List<List<Entity>>();
 
         private void Day21()
         {
@@ -47,7 +47,7 @@ namespace AdventOfCode._2015.Day21
                 {
                     for (int k = 0; k < gears[2].Count; k++) //Can buy upto 2 and minimum 0
                     {
-                        Entity player = new Entity
+                        Npc player = new Npc
                         {
                             Hp = 100,
                             Damange = gears[0][i].Damage + gears[1][j].Damage + gears[2][k].Damage,
@@ -67,7 +67,7 @@ namespace AdventOfCode._2015.Day21
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
         }
 
-        private bool Battle(Entity player, Entity boss)
+        private bool Battle(Npc player, Npc boss)
         {
             int playerDamagePrTurn = player.Damange - boss.Armour;
             int bossDamagePrTurn = boss.Damange - player.Armour;
@@ -100,11 +100,11 @@ namespace AdventOfCode._2015.Day21
             return player.Hp > 0;
         }
 
-        private Entity Boss()
+        private Npc Boss()
         {
             string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2015\Day21\input.txt";
             var bossStats = File.ReadAllLines(path).Select(s => int.Parse(s.Split(' ').Last())).ToList();
-            Entity boss = new Entity()
+            Npc boss = new Npc()
             {
                 Hp = bossStats[0],
                 Damange = bossStats[1],
@@ -118,7 +118,7 @@ namespace AdventOfCode._2015.Day21
             string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2015\Day21\Gear.txt";
             var gearInformation = File.ReadAllLines(path);
             Type currentType = Type.Weapon;
-            List<Gear> currentGear = new List<Gear>();
+            List<Entity> currentGear = new List<Entity>();
             for (int i = 1; i < gearInformation.Length; i++)
             {
                 string s = gearInformation[i];
@@ -128,7 +128,7 @@ namespace AdventOfCode._2015.Day21
 
                     if (currentType != Type.Ring)
                     {
-                        currentGear.Add(new Gear()
+                        currentGear.Add(new Entity()
                         {
                             Type = currentType,
                             Name = details[0],
@@ -139,7 +139,7 @@ namespace AdventOfCode._2015.Day21
                     }
                     else
                     {
-                        currentGear.Add(new Gear()
+                        currentGear.Add(new Entity()
                         {
                             Type = currentType,
                             Name = details[0] + " " + details[1],
@@ -161,7 +161,7 @@ namespace AdventOfCode._2015.Day21
                     }
                     i++;
                     gears.Add(currentGear);
-                    currentGear = new List<Gear>();
+                    currentGear = new List<Entity>();
                 }
             }
             gears.Add(currentGear);
