@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode._2015.Day21
 {
-    public class Day21Part1
+    public class Day21Part2
     {
         private readonly List<List<Entity>> gears = new List<List<Entity>>();
 
@@ -17,7 +17,7 @@ namespace AdventOfCode._2015.Day21
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            int ans = int.MaxValue;
+            int ans = int.MinValue;
             for (int i = 0; i < gears[0].Count; i++)
             {
                 for (int j = 0; j < gears[1].Count; j++)
@@ -34,7 +34,7 @@ namespace AdventOfCode._2015.Day21
                             };
                             int cost = gears[0][i].Cost + gears[1][j].Cost + gears[2][k].Cost + gears[2][x].Cost;
 
-                            if (Battle(player, Boss())) ans = Math.Min(ans, cost);
+                            if (!Battle(player, Boss())) ans = Math.Max(ans, cost);
                         }
                     }
                 }
@@ -144,7 +144,7 @@ namespace AdventOfCode._2015.Day21
                             Type = currentType
                         });
                     }
-                    i++;
+                    i++;                    
                 }
             }
             gears.Add(currentGear);

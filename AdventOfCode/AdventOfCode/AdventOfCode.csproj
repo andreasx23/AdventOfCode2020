@@ -64,6 +64,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="2015\Day21\Day21Part1.cs" />
+    <Compile Include="2015\Day21\Day21Part2.cs" />
+    <Compile Include="2015\Day21\Entity.cs" />
+    <Compile Include="2015\Day21\Npc.cs" />
     <Compile Include="2016\Day01\Day1Part1.cs" />
     <Compile Include="2016\Day01\Day1Part2.cs" />
     <Compile Include="2016\Day02\Day2Part1.cs" />
