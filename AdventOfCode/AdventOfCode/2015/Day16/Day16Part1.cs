@@ -43,11 +43,7 @@ namespace AdventOfCode._2015.Day16
                     a.AkitasDog == target.AkitasDog && a.VizslasDog == target.VizslasDog && a.Cars == target.Cars ||
                     a.AkitasDog == target.AkitasDog && a.VizslasDog == target.VizslasDog && a.Perfumes == target.Perfumes).ToList();
 
-            int ans = 0;
-            foreach (var a in input)
-            {
-                ans = a.Id;
-            }
+            int ans = input.First().Id;
 
             watch.Stop();
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");

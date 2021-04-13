@@ -34,7 +34,7 @@ namespace AdventOfCode._2015.Day16
             input = input.Where(a => a.Cats > target.Cats || a.Trees > target.Trees ||
             a.PomeraniansDog < target.PomeraniansDog && a.PomeraniansDog != -1 || a.Goldfish < target.Goldfish && a.Goldfish != -1).ToList();
 
-            int ans = 0, bestMatch = -1;
+            int ans = 0, bestMatch = 0;
             foreach (var a in input)
             {
                 int matches = 0;
