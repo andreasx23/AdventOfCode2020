@@ -51,6 +51,9 @@
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -63,6 +66,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="2015\Day16\Aunt.cs" />
+    <Compile Include="2015\Day16\Day16Part1.cs" />
+    <Compile Include="2015\Day16\Day16Part2.cs" />
+    <Compile Include="2015\Day17\Day17Part1.cs" />
+    <Compile Include="2015\Day17\Day17Part2.cs" />
+    <Compile Include="2015\Day18\Day18Part1.cs" />
+    <Compile Include="2015\Day18\Day18Part2.cs" />
+    <Compile Include="2015\Day20\Day20Part1.cs" />
+    <Compile Include="2015\Day20\Day20Part2.cs" />
     <Compile Include="2015\Day21\Day21Part1.cs" />
     <Compile Include="2015\Day21\Day21Part2.cs" />
     <Compile Include="2015\Day21\Entity.cs" />
@@ -203,6 +215,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
@@ -216,5 +229,6 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
