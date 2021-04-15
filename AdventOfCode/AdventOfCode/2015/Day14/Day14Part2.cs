@@ -8,11 +8,6 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode._2015.Day14
 {
-    partial class Reindeer
-    {
-        public int Points;
-    }
-
     public class Day14Part2
     {
         private readonly List<Reindeer> reindeers = new List<Reindeer>();
