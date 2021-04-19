@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode._2015.Day22
 {
-    public class Day22Part1
+    public class Day22Part2
     {
         private readonly Boss boss = new Boss();
         private readonly Player player = new Player() { Hp = 50, Mana = 500 };
@@ -23,7 +23,7 @@ namespace AdventOfCode._2015.Day22
             {
                 Player newPlayerState = new Player()
                 {
-                    Hp = player.Hp,
+                    Hp = player.Hp - 1,
                     Mana = player.Mana - spell.ManaCost,
                     TotalManaUsed = spell.ManaCost,
                     Spells = player.Spells.Select(s => (Spell)s.Clone()).ToList()
@@ -76,6 +76,12 @@ namespace AdventOfCode._2015.Day22
                 bool isPlayersTurn = true;
                 for (int i = 0; i < 2; i++)
                 {
+                    if (isPlayersTurn) 
+                    {
+                        current.player.Hp -= 1;
+                        if (current.GameOver) break; //Player loses
+                    }
+
                     int playerDamage = 0;
                     int bossDamage = current.boss.Damage;
                     foreach (var spell in current.player.Spells.Where(s => s.IsEffectActive))

@@ -84,7 +84,12 @@
     <Compile Include="2015\Day21\Day21Part2.cs" />
     <Compile Include="2015\Day21\Entity.cs" />
     <Compile Include="2015\Day21\Npc.cs" />
+    <Compile Include="2015\Day22\Boss.cs" />
     <Compile Include="2015\Day22\Day22Part1.cs" />
+    <Compile Include="2015\Day22\Day22Part2.cs" />
+    <Compile Include="2015\Day22\Game.cs" />
+    <Compile Include="2015\Day22\Player.cs" />
+    <Compile Include="2015\Day22\Spell.cs" />
     <Compile Include="2016\Day01\Day1Part1.cs" />
     <Compile Include="2016\Day01\Day1Part2.cs" />
     <Compile Include="2016\Day02\Day2Part1.cs" />
