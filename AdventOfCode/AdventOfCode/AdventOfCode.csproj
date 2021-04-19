@@ -90,6 +90,7 @@
     <Compile Include="2015\Day22\Game.cs" />
     <Compile Include="2015\Day22\Player.cs" />
     <Compile Include="2015\Day22\Spell.cs" />
+    <Compile Include="2015\Day25\Day25Part1.cs" />
     <Compile Include="2016\Day01\Day1Part1.cs" />
     <Compile Include="2016\Day01\Day1Part2.cs" />
     <Compile Include="2016\Day02\Day2Part1.cs" />
