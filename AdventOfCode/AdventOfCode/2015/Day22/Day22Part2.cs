@@ -21,37 +21,7 @@ namespace AdventOfCode._2015.Day22
             Queue<Game> queue = new Queue<Game>();
             foreach (var spell in player.Spells)
             {
-                Player newPlayerState = new Player()
-                {
-                    Hp = player.Hp - 1,
-                    Mana = player.Mana - spell.ManaCost,
-                    TotalManaUsed = spell.ManaCost,
-                    Spells = player.Spells.Select(s => (Spell)s.Clone()).ToList()
-                };
-                Boss newBossState = new Boss() { Hp = boss.Hp, Damage = boss.Damage };
-
-                if (spell.HasEffect)
-                {
-                    newPlayerState.Spells.FirstOrDefault(s => s.Name == spell.Name).Activate();
-                }
-                else
-                {
-                    if (spell.Name == SpellName.MagicMissile)
-                    {
-                        newBossState.Hp -= spell.Damage;
-                    }
-                    else if (spell.Name == SpellName.Drain)
-                    {
-                        newPlayerState.Hp += spell.Heal;
-                        newBossState.Hp -= spell.Damage;
-                    }
-                    else
-                    {
-                        Console.WriteLine("ERROR");
-                    }
-                }
-
-                Game newState = new Game(newPlayerState, newBossState);
+                Game newState = GenerateNewGameState(spell, player, boss, true);
                 queue.Enqueue(newState);
             }
 
@@ -144,40 +114,7 @@ namespace AdventOfCode._2015.Day22
                 {
                     if (current.player.Mana >= spell.ManaCost)
                     {
-                        Player newPlayerState = new Player()
-                        {
-                            Hp = current.player.Hp,
-                            Mana = current.player.Mana - spell.ManaCost,
-                            TotalManaUsed = current.player.TotalManaUsed + spell.ManaCost,
-                            Spells = current.player.Spells.Select(s => (Spell)s.Clone()).ToList()
-                        };
-                        Boss newBossState = new Boss() { Hp = current.boss.Hp, Damage = current.boss.Damage };
-
-                        if (spell.HasEffect)
-                        {
-                            if (!spell.IsEffectActive)
-                            {
-                                newPlayerState.Spells.FirstOrDefault(s => s.Name == spell.Name).Activate();
-                            }
-                        }
-                        else
-                        {
-                            if (spell.Name == SpellName.MagicMissile)
-                            {
-                                newBossState.Hp -= spell.Damage;
-                            }
-                            else if (spell.Name == SpellName.Drain)
-                            {
-                                newPlayerState.Hp += spell.Heal;
-                                newBossState.Hp -= spell.Damage;
-                            }
-                            else
-                            {
-                                Console.WriteLine("ERROR");
-                            }
-                        }
-
-                        Game newState = new Game(newPlayerState, newBossState);
+                        Game newState = GenerateNewGameState(spell, current.player, current.boss, false);
                         queue.Enqueue(newState);
                     }
                 }
@@ -187,9 +124,48 @@ namespace AdventOfCode._2015.Day22
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
         }
 
+        private Game GenerateNewGameState(Spell spell, Player player, Boss boss, bool subtractOneHp)
+        {
+            Player newPlayerState = new Player()
+            {
+                Hp = subtractOneHp ? player.Hp - 1 : player.Hp,
+                Mana = player.Mana - spell.ManaCost,
+                TotalManaUsed = player.TotalManaUsed + spell.ManaCost,
+                Spells = player.Spells.Select(s => (Spell)s.Clone()).ToList()
+            };
+            Boss newBossState = new Boss() { Hp = boss.Hp, Damage = boss.Damage };
+
+            if (spell.HasEffect)
+            {
+                if (!spell.IsEffectActive)
+                {
+                    newPlayerState.Spells.FirstOrDefault(s => s.Name == spell.Name).Activate();
+                }
+            }
+            else
+            {
+                if (spell.Name == SpellName.MagicMissile)
+                {
+                    newBossState.Hp -= spell.Damage;
+                }
+                else if (spell.Name == SpellName.Drain)
+                {
+                    newPlayerState.Hp += spell.Heal;
+                    newBossState.Hp -= spell.Damage;
+                }
+                else
+                {
+                    Console.WriteLine("ERROR");
+                }
+            }
+
+            Game newState = new Game(newPlayerState, newBossState);
+            return newState;
+        }
+
         private void ReadData()
         {
-            string path = @"C:\Users\Andreas\Desktop\AdventOfCode2020\2015\Day22\input.txt";
+            string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2015\Day22\input.txt";
             var lines = File.ReadAllLines(path);
             bool isHp = true;
             foreach (var s in lines)
