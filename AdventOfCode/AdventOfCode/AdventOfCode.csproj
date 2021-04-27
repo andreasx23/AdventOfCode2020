@@ -66,6 +66,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="2015\Day09\Day9Part1.cs" />
+    <Compile Include="2015\Day09\Day9Part2.cs" />
+    <Compile Include="2015\Day09\Node.cs" />
+    <Compile Include="2015\Day09\State.cs" />
     <Compile Include="2015\Day11\Day11Part1.cs" />
     <Compile Include="2015\Day11\Day11Part2.cs" />
     <Compile Include="2015\Day12\Day12Part1.cs" />
