@@ -32,53 +32,29 @@ namespace AdventOfCode._2015.Day03
             {
                 switch (direction)
                 {
-                    case Direction.Left:
-                        {
-                            if (isSanta)
-                            {
-                                santaY--;
-                            }
-                            else
-                            {
-                                roboY--;
-                            }
-                        }
+                    case Direction.Left when isSanta:
+                        santaY--;
                         break;
-                    case Direction.Right:
-                        {
-                            if (isSanta)
-                            {
-                                santaY++;
-                            }
-                            else
-                            {
-                                roboY++;
-                            }
-                        }
+                    case Direction.Left when !isSanta:
+                        roboY--;
                         break;
-                    case Direction.Up:
-                        {
-                            if (isSanta)
-                            {
-                                santaX--;
-                            }
-                            else
-                            {
-                                roboX--;
-                            }
-                        }
+                    case Direction.Right when isSanta:
+                        santaY++;
                         break;
-                    case Direction.Down:
-                        {
-                            if (isSanta)
-                            {
-                                santaX++;
-                            }
-                            else
-                            {
-                                roboX++;
-                            }
-                        }
+                    case Direction.Right when !isSanta:
+                        roboY++;
+                        break;
+                    case Direction.Up when isSanta:
+                        santaX--;
+                        break;
+                    case Direction.Up when !isSanta:
+                        roboX--;
+                        break;
+                    case Direction.Down when isSanta:
+                        santaX++;
+                        break;
+                    case Direction.Down when !isSanta:
+                        roboX++;
                         break;
                     default:
                         throw new Exception();
