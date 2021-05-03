@@ -18,7 +18,7 @@ namespace AdventOfCode._2015.Day07
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            HashSet<string> valid = new HashSet<string>();
+            HashSet<string> isVisisted = new HashSet<string>();
             while (map["a"] == 0)
             {
                 foreach (var (todo, target) in commands)
@@ -30,8 +30,8 @@ namespace AdventOfCode._2015.Day07
                         ushort left = map.ContainsKey(split.First()) ? map[split.First()] : ushort.Parse(split.First());
                         ushort right = map.ContainsKey(split.Last()) ? map[split.Last()] : ushort.Parse(split.Last());
 
-                        if (split.First().All(c => !char.IsDigit(c)) && !valid.Contains(split.First()) ||
-                            split.Last().All(c => !char.IsDigit(c)) && !valid.Contains(split.Last())) continue;
+                        if (split.First().All(c => !char.IsDigit(c)) && !isVisisted.Contains(split.First()) ||
+                            split.Last().All(c => !char.IsDigit(c)) && !isVisisted.Contains(split.Last())) continue;
 
                         result = (ushort)(left & right);
                     }
@@ -40,7 +40,7 @@ namespace AdventOfCode._2015.Day07
                         var split = todo.Split(new string[] { " LSHIFT " }, StringSplitOptions.RemoveEmptyEntries).ToArray();
                         ushort left = map.ContainsKey(split.First()) ? map[split.First()] : ushort.Parse(split.First());
 
-                        if (split.First().All(c => !char.IsDigit(c)) && !valid.Contains(split.First())) continue;
+                        if (split.First().All(c => !char.IsDigit(c)) && !isVisisted.Contains(split.First())) continue;
 
                         int amount = int.Parse(split.Last());
                         result = (ushort)(left << amount);
@@ -50,7 +50,7 @@ namespace AdventOfCode._2015.Day07
                         var split = todo.Split(new string[] { " RSHIFT " }, StringSplitOptions.RemoveEmptyEntries).ToArray();
                         ushort left = map.ContainsKey(split.First()) ? map[split.First()] : ushort.Parse(split.First());
 
-                        if (split.First().All(c => !char.IsDigit(c)) && !valid.Contains(split.First())) continue;
+                        if (split.First().All(c => !char.IsDigit(c)) && !isVisisted.Contains(split.First())) continue;
 
                         int amount = int.Parse(split.Last());
                         result = (ushort)(left >> amount);
@@ -60,7 +60,7 @@ namespace AdventOfCode._2015.Day07
                         var split = todo.Split(new string[] { "NOT " }, StringSplitOptions.RemoveEmptyEntries).ToArray();
                         ushort right = map.ContainsKey(split.Last()) ? map[split.Last()] : ushort.Parse(split.Last());
 
-                        if (split.Last().All(c => !char.IsDigit(c)) && !valid.Contains(split.Last())) continue;
+                        if (split.Last().All(c => !char.IsDigit(c)) && !isVisisted.Contains(split.Last())) continue;
 
                         result = (ushort)~right;
                     }
@@ -70,8 +70,8 @@ namespace AdventOfCode._2015.Day07
                         ushort left = map.ContainsKey(split.First()) ? map[split.First()] : ushort.Parse(split.First());
                         ushort right = map.ContainsKey(split.Last()) ? map[split.Last()] : ushort.Parse(split.Last());
 
-                        if (split.First().All(c => !char.IsDigit(c)) && !valid.Contains(split.First()) ||
-                            split.Last().All(c => !char.IsDigit(c)) && !valid.Contains(split.Last())) continue;
+                        if (split.First().All(c => !char.IsDigit(c)) && !isVisisted.Contains(split.First()) ||
+                            split.Last().All(c => !char.IsDigit(c)) && !isVisisted.Contains(split.Last())) continue;
 
                         result = (ushort)(left | right);
                     }
@@ -79,13 +79,13 @@ namespace AdventOfCode._2015.Day07
                     {
                         var left = map.ContainsKey(todo) ? map[todo] : ushort.Parse(todo);
 
-                        if (todo.All(c => !char.IsDigit(c)) && !valid.Contains(todo)) continue;
+                        if (todo.All(c => !char.IsDigit(c)) && !isVisisted.Contains(todo)) continue;
 
                         result = left;                        
                     }
 
                     map[target] = result;
-                    valid.Add(target);
+                    isVisisted.Add(target);
                 }
             }
 
