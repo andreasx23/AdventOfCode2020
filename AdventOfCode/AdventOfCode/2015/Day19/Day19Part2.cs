@@ -11,60 +11,38 @@ namespace AdventOfCode._2015.Day19
     public class Day19Part2
     {
         private readonly List<(string from, string to)> transistions = new List<(string from, string to)>();
-        private string target = string.Empty;
+        private string input = string.Empty;
 
         private void Day19()
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            int runs = 0;
-            Queue<(string current, int count)> queue = new Queue<(string current, int count)>();
-            foreach (var (from, to) in transistions.Where(kv => kv.from == "e"))
+            string temp = input;
+            int ans = 0, sameTurns = 0;
+            Random rand = new Random();
+            while (temp != "e")
             {
-                queue.Enqueue((to, 1));
-                runs++;
-            }
+                var (from, to) = transistions[rand.Next(0, transistions.Count)];
 
-            int ans = 0;
-            HashSet<string> isVisisted = new HashSet<string>();
-            while (queue.Any())
-            {
-                var current = queue.Dequeue();
-
-                if (current.current == target)
+                while (temp.Contains(to))
                 {
-                    ans = current.count;
-                    break;
+                    var index = temp.IndexOf(to);
+                    temp = temp.Remove(index, to.Length);
+                    temp = temp.Insert(index, from);
+                    ans++;
                 }
 
-                if (current.current.Length >= target.Length) continue;
-
-                if (runs % 10000 == 0) Console.WriteLine(current.count);
-
-                foreach (var (from, to) in transistions)
+                if (sameTurns == 1000)
                 {
-                    for (int i = 0; i < current.current.Length; i++)
-                    {
-                        string temp = current.current[i].ToString();
-
-                        if (from.Length == 2 && i > 0) temp = current.current[i - 1].ToString() + current.current[i].ToString();
-
-                        if (temp == from)
-                        {
-                            string insert = (from.Length == 2) ?
-                                current.current.Insert(i + 1, to).Remove(i - 1, 2) :
-                                current.current.Insert(i + 1, to).Remove(i, 1);
-
-                            if (isVisisted.Add(insert))
-                            {
-                                queue.Enqueue((insert, current.count + 1));
-                            }
-                        }
-                    }
+                    sameTurns = 0;
+                    ans = 0;
+                    temp = input;
                 }
-
-                runs++;
+                else
+                {
+                    sameTurns++;
+                }
             }
 
             watch.Stop();
@@ -84,7 +62,7 @@ namespace AdventOfCode._2015.Day19
                 i++;
             }
 
-            target = lines.Last();
+            input = lines.Last();
         }
 
         public void TestCase()
