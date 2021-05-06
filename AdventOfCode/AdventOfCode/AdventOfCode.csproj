@@ -80,6 +80,8 @@
     <Compile Include="2015\Day06\Day6Part2.cs" />
     <Compile Include="2015\Day07\Day7Part1.cs" />
     <Compile Include="2015\Day07\Day7Part2.cs" />
+    <Compile Include="2015\Day08\Day8Part1.cs" />
+    <Compile Include="2015\Day08\Day8Part2.cs" />
     <Compile Include="2015\Day09\Day9Part1.cs" />
     <Compile Include="2015\Day09\Day9Part2.cs" />
     <Compile Include="2015\Day09\Node.cs" />
@@ -119,6 +121,9 @@
     <Compile Include="2015\Day22\Game.cs" />
     <Compile Include="2015\Day22\Player.cs" />
     <Compile Include="2015\Day22\Spell.cs" />
+    <Compile Include="2015\Day23\Day23Part1.cs" />
+    <Compile Include="2015\Day23\Day23Part2.cs" />
+    <Compile Include="2015\Day24\Day24Part1.cs" />
     <Compile Include="2015\Day25\Day25Part1.cs" />
     <Compile Include="2016\Day01\Day1Part1.cs" />
     <Compile Include="2016\Day01\Day1Part2.cs" />
