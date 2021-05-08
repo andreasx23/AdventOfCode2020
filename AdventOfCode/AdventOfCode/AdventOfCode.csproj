@@ -124,6 +124,7 @@
     <Compile Include="2015\Day23\Day23Part1.cs" />
     <Compile Include="2015\Day23\Day23Part2.cs" />
     <Compile Include="2015\Day24\Day24Part1.cs" />
+    <Compile Include="2015\Day24\Day24Part2.cs" />
     <Compile Include="2015\Day25\Day25Part1.cs" />
     <Compile Include="2016\Day01\Day1Part1.cs" />
     <Compile Include="2016\Day01\Day1Part2.cs" />

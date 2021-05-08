@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode._2015.Day24
 {
-    public class Day24Part1
+    public class Day24Part2
     {
         private int[] inputs;
 
@@ -18,7 +18,7 @@ namespace AdventOfCode._2015.Day24
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            BigInteger ans = LowestQuantumEntanglement(inputs, inputs.Sum() / 3, 0, 0, 1);
+            BigInteger ans = LowestQuantumEntanglement(inputs, inputs.Sum() / 4, 0, 0, 1);
 
             watch.Stop();
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
