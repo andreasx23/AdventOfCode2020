@@ -20,14 +20,14 @@ namespace AdventOfCode._2017.Day12
 
             foreach (var pipe in map.Values)
             {
-                DFS(pipe, 0, new HashSet<Pipe>());
+                ConnectsToZero(pipe, 0, new HashSet<Pipe>());
             }
 
             watch.Stop();
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
         }
 
-        private void DFS(Pipe pipe, int target, HashSet<Pipe> isVisited)
+        private void ConnectsToZero(Pipe pipe, int target, HashSet<Pipe> isVisited)
         {
             if (pipe.Id == target)
             {
@@ -39,7 +39,7 @@ namespace AdventOfCode._2017.Day12
             {
                 foreach (var connection in pipe.Connections)
                 {
-                    DFS(connection, target, isVisited);
+                    ConnectsToZero(connection, target, isVisited);
                 }
             }
         }

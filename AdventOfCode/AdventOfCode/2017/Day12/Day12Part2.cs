@@ -11,42 +11,41 @@ namespace AdventOfCode._2017.Day12
     public class Day12Part2
     {
         private readonly Dictionary<int, Pipe> map = new Dictionary<int, Pipe>();
-        private int ans = 0;
 
         private void Day12()
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            foreach (var pipe in map.Values)
+            int ans = 0;
+            List<Pipe> pipes = map.Values.ToList();
+            while (pipes.Any())
             {
-                DFS(pipe, 0, new HashSet<Pipe>());
+                Pipe current = pipes.First();
+                HashSet<Pipe> group = new HashSet<Pipe>();
+                GenerateGroup(current, group);
+                pipes.RemoveAll(p => group.Contains(p));
+                ans++;
             }
 
             watch.Stop();
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
         }
 
-        private void DFS(Pipe pipe, int target, HashSet<Pipe> isVisited)
+        private void GenerateGroup(Pipe pipe, HashSet<Pipe> group)
         {
-            if (pipe.Id == target)
+            if (group.Add(pipe))
             {
-                ans++;
-                return;
-            }
-
-            if (isVisited.Add(pipe))
-            {
-                foreach (var connection in pipe.Connections)
+                foreach (var child in pipe.Connections)
                 {
-                    DFS(connection, target, isVisited);
+                    GenerateGroup(child, group);
                 }
             }
         }
 
         private void ReadData()
         {
-            string path = @"C:\Users\Andreas\Desktop\AdventOfCode2020\2017\Day12\sample.txt";
+            string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2017\Day12\input.txt";
             var lines = File.ReadAllLines(path);
 
             foreach (var s in lines)
