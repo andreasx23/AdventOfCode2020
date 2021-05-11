@@ -173,6 +173,7 @@
     <Compile Include="2016\Day24\Tile.cs" />
     <Compile Include="2017\Day07\Day7Part1.cs" />
     <Compile Include="2017\Day07\Day7Part2.cs" />
+    <Compile Include="2017\Day07\TreeNode.cs" />
     <Compile Include="2018\Day01\Day1Part1.cs" />
     <Compile Include="2018\Day01\Day1Part2.cs" />
     <Compile Include="2018\Day02\Day2Part1.cs" />

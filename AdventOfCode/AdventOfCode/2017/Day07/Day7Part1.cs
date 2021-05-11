@@ -10,19 +10,6 @@ namespace AdventOfCode._2017.Day07
 {
     public class Day7Part1
     {
-        class TreeNode
-        {
-            public string Name;
-            public int Weight;
-            public TreeNode Parent;
-            public List<TreeNode> Childs;
-
-            public TreeNode()
-            {
-                Childs = new List<TreeNode>();
-            }
-        }
-
         private readonly Dictionary<string, TreeNode> map = new Dictionary<string, TreeNode>();
 
         private void Day7()
@@ -74,7 +61,6 @@ namespace AdventOfCode._2017.Day07
                     var current = map[temp];
                     current.Parent = actual;
                     actual.Childs.Add(current);
-
                 }
             }
         }
