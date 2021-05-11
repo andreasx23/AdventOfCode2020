@@ -99,7 +99,7 @@ namespace AdventOfCode._2017.Day07
             {
                 var split = s.Split(' ').ToArray();
 
-                var actual = map[split.First()];
+                var node = map[split.First()];
                 for (int i = 3; i < split.Length; i++)
                 {
                     var temp = split[i];
@@ -107,9 +107,9 @@ namespace AdventOfCode._2017.Day07
                     {
                         temp = temp.Substring(0, temp.Length - 1);
                     }
-                    var current = map[temp];
-                    current.Parent = actual;
-                    actual.Childs.Add(current);
+                    var child = map[temp];
+                    child.Parent = node;
+                    node.Childs.Add(child);
                 }
             }
 
