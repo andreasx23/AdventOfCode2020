@@ -177,6 +177,8 @@
     <Compile Include="2017\Day12\Day12Part1.cs" />
     <Compile Include="2017\Day12\Day12Part2.cs" />
     <Compile Include="2017\Day12\Pipe.cs" />
+    <Compile Include="2017\Day16\Day16Part1.cs" />
+    <Compile Include="2017\Day16\Day16Part2.cs" />
     <Compile Include="2018\Day01\Day1Part1.cs" />
     <Compile Include="2018\Day01\Day1Part2.cs" />
     <Compile Include="2018\Day02\Day2Part1.cs" />
