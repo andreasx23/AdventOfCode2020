@@ -25,7 +25,7 @@ namespace AdventOfCode._2017.Day16
             {
                 if (isVisited.Contains(ans))
                 {
-                    ans = isVisited[(runs - 1) % i];
+                    ans = isVisited[(runs - i) % i - 1];
                     break;
                 }
 
@@ -58,7 +58,7 @@ namespace AdventOfCode._2017.Day16
         {
             var array = input.ToCharArray();
             int n = array.Length;
-            for (int i = 0; i < times; i++)
+            for (int i = 0; i < (times % n); i++)
             {
                 var temp = new char[n];
                 for (int j = 0; j < n; j++)
