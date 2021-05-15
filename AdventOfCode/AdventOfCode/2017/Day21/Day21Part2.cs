@@ -27,7 +27,7 @@ namespace AdventOfCode._2017.Day21
             {
                 int gridWidth = grid[0].Length;
                 int width = (gridWidth % 2 == 0) ? gridWidth / 2 : gridWidth / 3;
-                List<char[][]> squares = (gridWidth % 2 == 0) ? GenerateGrids(grid, 2) : GenerateGrids(grid, 3);
+                List<char[][]> squares = (gridWidth % 2 == 0) ? GenerateSquares(grid, 2) : GenerateSquares(grid, 3);
 
                 int n = squares.Count;
                 for (int j = 0; j < n; j++)
@@ -41,28 +41,26 @@ namespace AdventOfCode._2017.Day21
                     continue;
                 }
 
-                List<char[][]> output = new List<char[][]>();                
-                for (int j = 1; j < n; j++)
+                List<char[][]> newSquares = new List<char[][]>();                
+                for (int j = 0; j < n; j++)
                 {
                     char[][] current = null;
-
-                    if (output.Count == 0 || j % width == 0)
+                    if (j % width == 0)
                     {
-                        if (j % width == 0) j++;
-
-                        current = Concat(squares[j - 1], squares[j]);
-                        output.Add(current);
+                        j++;
+                        current = ConcatSquares(squares[j - 1], squares[j]);
+                        newSquares.Add(current);
                     }
                     else
                     {
-                        output[output.Count - 1] = Concat(output.Last(), squares[j]);
+                        newSquares[newSquares.Count - 1] = ConcatSquares(newSquares.Last(), squares[j]);
                     }
                 }
 
-                char[][] newGrid = output.First();
-                for (int j = 1; j < output.Count; j++)
+                char[][] newGrid = newSquares.First();
+                for (int j = 1; j < newSquares.Count; j++)
                 {
-                    newGrid = newGrid.Concat(output[j]).ToArray();
+                    newGrid = newGrid.Concat(newSquares[j]).ToArray();
                 }
                 grid = newGrid;
             }
@@ -73,7 +71,7 @@ namespace AdventOfCode._2017.Day21
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
         }
 
-        private char[][] Concat(char[][] array1, char[][] array2)
+        private char[][] ConcatSquares(char[][] array1, char[][] array2)
         {
             List<char[]> output = new List<char[]>();
 
@@ -90,7 +88,6 @@ namespace AdventOfCode._2017.Day21
                 {
                     temp[widthArray1 + j] = array2[i][j];
                 }
-
                 output.Add(temp);
             }
 
@@ -115,7 +112,7 @@ namespace AdventOfCode._2017.Day21
             return true;
         }
 
-        private List<char[][]> GenerateGrids(char[][] grid, int size)
+        private List<char[][]> GenerateSquares(char[][] grid, int size)
         {
             int H = grid.Length, W = grid[0].Length;
 
