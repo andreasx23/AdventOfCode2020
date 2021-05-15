@@ -7,8 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AdventOfCode._2017.Day21
-{   
-    public class Day21Part1
+{
+    public class Day21Part2
     {
         private char[][] grid = new char[][]
         {
@@ -23,7 +23,7 @@ namespace AdventOfCode._2017.Day21
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 18; i++)
             {
                 int gridWidth = grid[0].Length;
                 int width = (gridWidth % 2 == 0) ? gridWidth / 2 : gridWidth / 3;
@@ -41,7 +41,7 @@ namespace AdventOfCode._2017.Day21
                     continue;
                 }
 
-                List<char[][]> output = new List<char[][]>();
+                List<char[][]> output = new List<char[][]>();                
                 for (int j = 1; j < n; j++)
                 {
                     char[][] current = null;
@@ -83,7 +83,7 @@ namespace AdventOfCode._2017.Day21
                 char[] temp = new char[widthArray1 + widthArray2];
                 for (int j = 0; j < widthArray1; j++)
                 {
-                    temp[j] = array1[i][j];                    
+                    temp[j] = array1[i][j];
                 }
 
                 for (int j = 0; j < widthArray2; j++)
