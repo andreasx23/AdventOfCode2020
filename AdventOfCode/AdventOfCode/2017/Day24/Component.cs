@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode._2017.Day24
 {
-    public class Port
+    public class Component
     {
         public int Left;
         public int Right;

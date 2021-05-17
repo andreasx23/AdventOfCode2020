@@ -10,7 +10,7 @@ namespace AdventOfCode._2017.Day24
 {
     public class Day24Part2
     {
-        private readonly List<Port> ports = new List<Port>();
+        private readonly List<Component> ports = new List<Component>();
         private int bestScore = 0, bestLen = 0;
 
         private void Day24()
@@ -29,8 +29,8 @@ namespace AdventOfCode._2017.Day24
                     port.IsRightUsed = true;
                 }
 
-                var deep = ports.ConvertAll(p => new Port() { Left = p.Left, Right = p.Right, IsLeftUsed = p.IsLeftUsed, IsRightUsed = p.IsRightUsed });
-                Recursive(deep, new HashSet<Port>() { port }, port, port.Score);
+                var deep = ports.ConvertAll(p => new Component() { Left = p.Left, Right = p.Right, IsLeftUsed = p.IsLeftUsed, IsRightUsed = p.IsRightUsed });
+                Recursive(deep, new HashSet<Component>() { port }, port, port.Score);
 
                 port.IsLeftUsed = false;
                 port.IsRightUsed = false;
@@ -42,7 +42,7 @@ namespace AdventOfCode._2017.Day24
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
         }
 
-        private void Recursive(List<Port> ports, HashSet<Port> isVisited, Port current, int score)
+        private void Recursive(List<Component> ports, HashSet<Component> isVisited, Component current, int score)
         {
             foreach (var port in ports)
             {
@@ -83,7 +83,7 @@ namespace AdventOfCode._2017.Day24
             foreach (var s in lines)
             {
                 var split = s.Split('/');
-                ports.Add(new Port()
+                ports.Add(new Component()
                 {
                     Left = int.Parse(split.First()),
                     Right = int.Parse(split.Last())
