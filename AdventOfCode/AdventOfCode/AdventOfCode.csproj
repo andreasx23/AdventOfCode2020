@@ -186,6 +186,9 @@
     <Compile Include="2017\Day22\Day22Part1.cs" />
     <Compile Include="2017\Day22\Day22Part2.cs" />
     <Compile Include="2017\Day22\Node.cs" />
+    <Compile Include="2017\Day24\Day24Part1.cs" />
+    <Compile Include="2017\Day24\Day24Part2.cs" />
+    <Compile Include="2017\Day24\Port.cs" />
     <Compile Include="2018\Day01\Day1Part1.cs" />
     <Compile Include="2018\Day01\Day1Part2.cs" />
     <Compile Include="2018\Day02\Day2Part1.cs" />
