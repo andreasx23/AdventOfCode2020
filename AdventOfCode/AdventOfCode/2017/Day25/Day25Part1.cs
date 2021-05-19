@@ -70,7 +70,7 @@ namespace AdventOfCode._2017.Day25
 
         private void ReadData()
         {
-            string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2017\Day25\input.txt";
+            string path = @"C:\Users\Andreas\Desktop\AdventOfCode2020\2017\Day25\input.txt";
             var lines = File.ReadAllLines(path);
 
             firstState = RemoveDot(lines.First()).Split(' ').Last();

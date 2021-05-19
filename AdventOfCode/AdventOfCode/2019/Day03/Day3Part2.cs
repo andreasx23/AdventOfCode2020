@@ -99,11 +99,11 @@ namespace AdventOfCode._2019.Day03
             }
 
             int ans = int.MaxValue;
-            foreach (var dic in wires.First())
+            foreach (var kv in wires.First())
             {
-                if (wires.Last().ContainsKey((dic.Key.x, dic.Key.y)))
+                if (wires.Last().ContainsKey((kv.Key.x, kv.Key.y)))
                 {
-                    ans = Math.Min(ans, dic.Value + wires.Last()[(dic.Key.x, dic.Key.y)]);
+                    ans = Math.Min(ans, kv.Value + wires.Last()[(kv.Key.x, kv.Key.y)]);
                 }                
             }
 
