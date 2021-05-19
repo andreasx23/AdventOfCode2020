@@ -98,14 +98,10 @@ namespace AdventOfCode._2019.Day03
                 wires.Add(intersectionPoints);
             }
 
-            int ans = int.MaxValue;
-            foreach (var kv in wires.First())
+            int ans = wires.First().Min(kv =>
             {
-                if (wires.Last().ContainsKey((kv.Key.x, kv.Key.y)))
-                {
-                    ans = Math.Min(ans, kv.Value + wires.Last()[(kv.Key.x, kv.Key.y)]);
-                }                
-            }
+                return wires.Last().ContainsKey((kv.Key.x, kv.Key.y)) ? kv.Value + wires.Last()[(kv.Key.x, kv.Key.y)] : int.MaxValue;
+            });
 
             watch.Stop();
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
