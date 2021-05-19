@@ -8,6 +8,7 @@ namespace AdventOfCode
         public static void Main(string[] args)
         {
             Day3Part2 d = new Day3Part2();
+            d.TestCase();
         }
     }
 }
