@@ -8,29 +8,39 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode._2019.Day06
 {
-    public class Day6Part1
+    public class Day6Part2
     {
         private readonly Dictionary<string, Planet> map = new Dictionary<string, Planet>();
-        private readonly string start = "COM";
+        private readonly string start = "YOU";
 
         private void Day6()
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            Queue<(Planet node, int val)> queue = new Queue<(Planet node, int val)>();
+            Queue<(Planet node, int steps)> queue = new Queue<(Planet node, int steps)>();
+            HashSet<Planet> isVisited = new HashSet<Planet>();
             queue.Enqueue((map[start], 0));
             int ans = 0;
             while (queue.Any())
             {
-                (Planet node, int val) = queue.Dequeue();
+                (Planet node, int steps) = queue.Dequeue();
 
-                ans += val;
+                if (node.Name == "SAN")
+                {
+                    ans = steps - 2;
+                    break;
+                }
 
                 foreach (var child in node.Children)
                 {
-                    queue.Enqueue((child, val + 1));
+                    if (isVisited.Add(child))
+                    {
+                        queue.Enqueue((child, steps + 1));
+                    }
                 }
+
+                if (node.Parent != null && isVisited.Add(node.Parent)) queue.Enqueue((node.Parent, steps + 1));
             }
 
             watch.Stop();
