@@ -10,145 +10,94 @@ namespace AdventOfCode._2019.Day03
 {
     public class Day3Part1
     {
-        private readonly List<List<string>> wires = new List<List<string>>();
-        private int height, width;
-        private char[,] grid;
-        private bool[,] isVisited;
-        
+        private readonly List<List<Action>> actions = new List<List<Action>>();
+
         private void Day3()
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            height /= 5;
-            width /= 5;
-
-            grid = new char[height, width];
-            isVisited = new bool[height, width];
-
-            for (int initI = 0; initI < height; initI++)
+            Dictionary<(int x, int y), Drawing> grid = new Dictionary<(int x, int y), Drawing>();
+            foreach (var list in actions)
             {
-                for (int initJ = 0; initJ < width; initJ++)
+                int x = 0, y = 0;
+                foreach (var action in list)
                 {
-                    grid[initI, initJ] = '.';
-                }
-            }
-
-            (int i, int j) startPos = (height / 2, width / 2);
-            foreach (var wire in wires)
-            {
-                int i = startPos.i, j = startPos.j, n = wire.Count;
-
-                grid[i, j] = 'O';
-                isVisited[i, j] = true;
-
-                for (int index = 0; index < n; index++)
-                {
-                    char dir = wire[index][0];
-                    int steps = int.Parse(wire[index].Substring(1));
-
-                    for (int k = 0; k < steps; k++)
+                    for (int i = 0; i < action.Steps; i++)
                     {
-                        switch (dir)
+                        switch (action.Direction)
                         {
-                            case 'R':
-                                j++;
-                                grid[i, j] = '-';
+                            case Direction.RIGHT:
+                                y++;
                                 break;
-                            case 'L':
-                                j--;
-                                grid[i, j] = '-';
+                            case Direction.LEFT:
+                                y--;
                                 break;
-                            case 'U':
-                                i--;
-                                grid[i, j] = '|';
+                            case Direction.UP:
+                                x--;
                                 break;
-                            case 'D':
-                                i++;
-                                grid[i, j] = '|';
+                            case Direction.DOWN:
+                                x++;
                                 break;
                         }
 
-                        isVisited[i, j] = true;
+                        if (!grid.ContainsKey((x, y)))
+                        {
+                            grid.Add((x, y), Drawing.ROAD);
+                        }
+                        else
+                        {
+                            grid[(x, y)] = Drawing.TURN;
+                        }
                     }
-
-                    grid[i, j] = (IsIntersection(i, j)) ? 'X' : '+';
                 }
             }
 
-            List<(int i, int j)> postions = new List<(int, int)>();
-            for (int initI = 0; initI < height; initI++)
+            foreach (var (x, y) in grid.Keys.ToList())
             {
-                for (int initJ = 0; initJ < width; initJ++)
+                if (IsIntersection(grid, x, y))
                 {
-                    if (IsIntersection(initI, initJ))
-                    {
-                        grid[initI, initJ] = 'X';
-                        postions.Add((initI, initJ));
-                    }
+                    grid[(x, y)] = Drawing.INTERSECTION;
                 }
             }
 
-            Print();
-
-            int ans = int.MaxValue;
-            foreach (var tuple in postions)
-            {
-                int i = Math.Abs(startPos.i - tuple.i);
-                int j = Math.Abs(startPos.j - tuple.j);
-                int sum = i + j;
-                ans = Math.Min(ans, sum);
-            }
+            int ans = grid.Where(kv => kv.Value == Drawing.INTERSECTION).Min(kv => CalculateManhattenDistance(0, kv.Key.x, 0, kv.Key.y));
 
             watch.Stop();
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
         }
 
-        private bool IsIntersection(int i, int j)
+        private bool IsIntersection(Dictionary<(int x, int y), Drawing> map, int x, int y)
         {
-            return isVisited[i, j] && 
-                   isVisited[i - 1, j] && 
-                   isVisited[i + 1, j] && 
-                   isVisited[i, j - 1] && 
-                   isVisited[i, j + 1];
+            return map.ContainsKey((x - 1, y)) && map.ContainsKey((x + 1, y)) && map.ContainsKey((x, y - 1)) && map.ContainsKey((x, y + 1));
         }
 
-        private void Print()
+        private int CalculateManhattenDistance(int x1, int x2, int y1, int y2)
         {
-            foreach (var item in grid)
-            {
-                Console.WriteLine(string.Join("", item));
-            }
+            return Math.Abs(x1 - x2) + Math.Abs(y1 - y2);
         }
 
         private void ReadData()
         {
-            string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2019\Day03\input.txt";
-            var input = File.ReadAllLines(path);
+            string path = @"C:\Users\Andreas\Desktop\AdventOfCode2020\2019\Day03\input.txt";
+            var lines = File.ReadAllLines(path);
 
-            foreach (var s in input)
+            foreach (var s in lines)
             {
-                var _moves = s.Split(',');
-
-                List<string> toAdd = new List<string>();
-                foreach (var move in _moves)
+                var split = s.Split(',');
+                List<Action> temp = new List<Action>();
+                foreach (var value in split)
                 {
-                    char c = move[0];
-                    if (c == 'R' || c == 'L')
+                    var direction = (Direction)value[0];
+                    var steps = int.Parse(value.Substring(1));
+                    temp.Add(new Action()
                     {
-                        width += int.Parse(move.Substring(1));
-                    }
-                    else
-                    {
-                        height += int.Parse(move.Substring(1));
-                    }
-                    toAdd.Add(move);
+                        Direction = direction,
+                        Steps = steps
+                    });
                 }
-                wires.Add(toAdd);
+                actions.Add(temp);
             }
-
-            height += 3;
-            width += 3;
         }
 
         public void TestCase()
