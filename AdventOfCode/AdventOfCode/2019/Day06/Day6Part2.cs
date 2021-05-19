@@ -11,22 +11,23 @@ namespace AdventOfCode._2019.Day06
     public class Day6Part2
     {
         private readonly Dictionary<string, Planet> map = new Dictionary<string, Planet>();
-        private readonly string start = "YOU";
+        private readonly string start = "YOU", target = "SAN";
 
         private void Day6()
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
+            Planet init = map[start];
             Queue<(Planet node, int steps)> queue = new Queue<(Planet node, int steps)>();
-            HashSet<Planet> isVisited = new HashSet<Planet>();
-            queue.Enqueue((map[start], 0));
+            queue.Enqueue((init, 0));
+            HashSet<Planet> isVisited = new HashSet<Planet>() { init };
             int ans = 0;
             while (queue.Any())
             {
                 (Planet node, int steps) = queue.Dequeue();
 
-                if (node.Name == "SAN")
+                if (node.Name == target)
                 {
                     ans = steps - 2;
                     break;
