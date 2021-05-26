@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -9,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode._2019.Day14
 {
-    public class Day14Part1
+    public class Day14Part2
     {
         class Chemical
         {
@@ -33,19 +32,30 @@ namespace AdventOfCode._2019.Day14
         private const string FUEL = "FUEL";
         private const string ORE = "ORE";
         private int temp = 0;
+        private long balance = 1000000000000;
 
         private void Day14()
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
+            int ans = 0;
             var root = map[FUEL];
-            foreach (var child in root.Childs)
+            while (balance > 0)
             {
-                Produce(child);
-            }
+                temp = 0;
+                foreach (var child in root.Childs)
+                {
+                    Produce(child);
+                }
+                balance -= temp;
 
-            int ans = temp;
+                if (ans % 1000 == 0)
+                {
+                    Console.WriteLine(ans + " " + balance);
+                }
+                ans++;
+            }
 
             watch.Stop();
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
