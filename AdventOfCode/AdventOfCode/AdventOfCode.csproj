@@ -233,6 +233,7 @@
     <Compile Include="2019\Day07\Day7Part1.cs" />
     <Compile Include="2019\Day08\Day8Part1.cs" />
     <Compile Include="2019\Day08\Day8Part2.cs" />
+    <Compile Include="2019\Day14\Day14Part1.cs" />
     <Compile Include="2020\Day10\Day10Part1.cs" />
     <Compile Include="2020\Day10\Day10Part2.cs" />
     <Compile Include="2020\Day11\Day11Part1.cs" />
