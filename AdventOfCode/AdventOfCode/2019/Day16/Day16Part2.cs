@@ -46,51 +46,14 @@ namespace AdventOfCode._2019.Day16
                     temp[j] = int.Parse(sum.ToString().Last().ToString());
                 });
 
-                //for (int j = 0; j < n; j++)
-                //{
-                //    int index = (j == 0) ? 1 : 0;
-                //    int count = (j == 0) ? 0 : 1;
-                //    int sum = 0;
-                //    for (int k = 0; k < n; k++)
-                //    {
-                //        int val = input[k];
-                //        int times = basePattern[index];
-                //        int calc = val * times;
-                //        sum += calc;
-
-                //        if (++count == j + 1)
-                //        {
-                //            count = 0;
-                //            index = (index + 1) % basePattern.Count;
-                //        }
-                //    }
-                //    temp[j] = int.Parse(sum.ToString().Last().ToString());
-                //}
                 input = temp;
                 Console.WriteLine(i);
             }
 
-            //string ans = string.Join("", input.Take(8));
             string ans = string.Join("", input.Skip(offset).Take(8));
 
             watch.Stop();
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
-        }
-
-        private List<int> GeneratePattern(int repeat)
-        {
-            List<int> basePattern = new List<int>() { 0, 1, 0, -1 };
-            List<int> pattern = new List<int>();
-
-            for (int i = 0; i < basePattern.Count; i++)
-            {
-                for (int j = 0; j < repeat; j++)
-                {
-                    pattern.Add(basePattern[i]);
-                }
-            }
-
-            return pattern;
         }
 
         private void ReadData()
