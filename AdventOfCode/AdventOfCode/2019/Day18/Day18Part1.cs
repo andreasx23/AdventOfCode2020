@@ -1,4 +1,6 @@
-﻿using System;
+﻿using AlgoKit.Collections.Heaps;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -26,10 +28,37 @@ namespace AdventOfCode._2019.Day18
         {
             public int Steps;
             public char[][] Grid;
-            public List<char> CollectedKeys = new List<char>();
-            public HashSet<char> targets = new HashSet<char>();
+            public List<Key> CollectedKeys = new List<Key>();
             public int X;
             public int Y;
+            public int KeyCount;
+            public int ItemsUsed;
+        }
+
+        class Key
+        {
+            public int X;
+            public int Y;
+            public char Value;
+
+            public Key Clone()
+            {
+                return new Key()
+                {
+                    X = X,
+                    Y = Y,
+                    Value = Value
+                };
+            }
+        }
+
+        class Tile
+        {
+            public int X;
+            public int Y;
+            public int Cost;
+            public int Distance;
+            public int CostDistance => Cost + Distance;
         }
 
         private void Day18()
@@ -51,89 +80,131 @@ namespace AdventOfCode._2019.Day18
                 }
             }
 
-            Queue<State> queue = new Queue<State>();
-            foreach (var item in keys)
+            var comparer = Comparer<int>.Default;
+            var queue = new PairingHeap<int, State>(comparer);
+
+            List<Key> valids = new List<Key>();
+            DFS(grid, x, y, new bool[H, W], new List<Key>(), valids);
+
+            foreach (var key in valids)
             {
-                var output = CanReach(x, y, item.key, grid);
-                if (output.isReable)
+                var state = new State()
                 {
-                    var state = new State()
-                    {
-                        Grid = Copy(grid),
-                        X = output.x,
-                        Y = output.y,
-                        Steps = output.steps
-                    };
-                    state.targets = new HashSet<char>(targets);
-                    state.targets.Remove(item.key);
-                    state.CollectedKeys.Add(item.key);
-                    state.Grid[state.X][state.Y] = (char)Area.FLOOR;
-                    queue.Enqueue(state);
-                }
+                    Grid = CloneGrid(grid),
+                    X = key.X,
+                    Y = key.Y,
+                    Steps = ShortestPath(x, y, key.X, key.Y, grid),
+                    KeyCount = 1,
+                    ItemsUsed = 1
+                };
+                state.CollectedKeys.Add(key);
+                state.Grid[state.X][state.Y] = (char)Area.FLOOR;
+                queue.Add(state.Steps, state);
             }
 
-            int ans = 0, runs = 0;
-            while (queue.Any())
+            int ans = int.MaxValue, runs = 0, maxKeys = 0;
+            while (!queue.IsEmpty)
             {
-                var current = queue.Dequeue();
+                var current = queue.Pop().Value;
 
-                if (current.targets.Count == 0)
+                if (current.KeyCount == keys.Count)
                 {
-                    ans = current.Steps;
-                    break;
-                }
-
-                foreach (var target in targets)
-                {
-                    if (current.targets.Contains(target))
+                    if (current.Steps < ans)
                     {
-                        if (char.IsLower(target))
-                        {
-                            var output = CanReach(current.X, current.Y, target, current.Grid);
-                            if (output.isReable)
-                            {
-                                var state = new State()
-                                {
-                                    Grid = Copy(current.Grid),
-                                    X = output.x,
-                                    Y = output.y
-                                };
-                                state.Steps = current.Steps + output.steps;
-                                state.targets = new HashSet<char>(current.targets);
-                                state.targets.Remove(target);
-                                state.CollectedKeys.Add(target);
-                                state.Grid[state.X][state.Y] = (char)Area.FLOOR;
-                                queue.Enqueue(state);
-                            }
-                        }
-                        else if (char.IsUpper(target) && current.CollectedKeys.Contains(char.ToLower(target)))
-                        {
-                            var output = CanReach(current.X, current.Y, target, current.Grid);
-                            if (output.isReable)
-                            {
-                                var state = new State()
-                                {
-                                    Grid = Copy(current.Grid),
-                                    X = output.x,
-                                    Y = output.y
-                                };
-                                state.Steps = current.Steps + output.steps;
-                                state.targets = new HashSet<char>(current.targets);
-                                state.targets.Remove(target);
-                                state.CollectedKeys.Remove(char.ToLower(target));
-                                state.Grid[state.X][state.Y] = (char)Area.FLOOR;
-                                queue.Enqueue(state);
-                            }
-                        }
+                        ans = current.Steps;
+                        Console.WriteLine(ans);
                     }
+                    continue;
                 }
 
-                if (runs % 1000 == 0) Console.WriteLine($"Ran a total of {runs} times");
+                maxKeys = Math.Max(maxKeys, current.KeyCount);
+
+                List<Key> localValids = new List<Key>();
+                DFS(current.Grid, current.X, current.Y, new bool[H, W], current.CollectedKeys, localValids);
+
+                Parallel.ForEach(localValids, key =>
+                {
+                    var newGrid = CloneGrid(current.Grid);
+                    var steps = ShortestPath(current.X, current.Y, key.X, key.Y, current.Grid);
+                    if (char.IsUpper(key.Value))
+                    {
+                        State state = new State()
+                        {
+                            X = key.X,
+                            Y = key.Y,
+                            KeyCount = current.KeyCount,
+                            Grid = newGrid,
+                            Steps = current.Steps + steps,
+                            CollectedKeys = new List<Key>(current.CollectedKeys.Select(k => k.Clone())),
+                            ItemsUsed = current.ItemsUsed + 1
+                        };
+                        state.Grid[key.X][key.Y] = '.';
+                        state.CollectedKeys.Remove(key);
+                        queue.Add(state.Steps, state);
+                    }
+                    else
+                    {
+                        State state = new State()
+                        {
+                            X = key.X,
+                            Y = key.Y,
+                            KeyCount = current.KeyCount + 1,
+                            Grid = CloneGrid(current.Grid),
+                            Steps = current.Steps + steps,
+                            CollectedKeys = new List<Key>(current.CollectedKeys.Select(k => k.Clone())),
+                            ItemsUsed = current.ItemsUsed + 1
+                        };
+                        state.Grid[key.X][key.Y] = '.';
+                        state.CollectedKeys.Add(key);
+                        queue.Add(state.Steps, state);
+                    }
+                });
+
+                if (runs % 1000 == 0)
+                {
+                    Console.WriteLine($"Ran a total of {runs} times - Best amount of keys: {maxKeys}");
+                }
                 runs++;
             }
 
             watch.Stop();
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
+        }
+
+        private void DFS(char[][] grid, int x, int y, bool[,] visisted, List<Key> collectedKeys, List<Key> valids)
+        {
+            if (x < 0 || x >= grid.Length || y < 0 || y >= grid[x].Length || visisted[x, y] || grid[x][y] == (char)Area.WALL) return;
+
+            if (char.IsUpper(grid[x][y]))
+            {
+                if (collectedKeys.Any(k => k.Value == char.ToLower(grid[x][y])))
+                {
+                    valids.Add(new Key()
+                    {
+                        Value = grid[x][y],
+                        X = x,
+                        Y = y
+                    });
+                }
+                return;
+            }
+            else if (char.IsLower(grid[x][y]))
+            {
+                valids.Add(new Key()
+                {
+                    Value = grid[x][y],
+                    X = x,
+                    Y = y
+                });
+                return;
+            }
+
+            visisted[x, y] = true;
+
+            DFS(grid, x + 1, y, visisted, collectedKeys, valids);
+            DFS(grid, x - 1, y, visisted, collectedKeys, valids);
+            DFS(grid, x, y + 1, visisted, collectedKeys, valids);
+            DFS(grid, x, y - 1, visisted, collectedKeys, valids);
         }
 
         private void Print(char[][] grid)
@@ -144,7 +215,7 @@ namespace AdventOfCode._2019.Day18
             }
         }
 
-        private char[][] Copy(char[][] grid)
+        private char[][] CloneGrid(char[][] grid)
         {
             char[][] result = new char[H][];
 
@@ -160,65 +231,80 @@ namespace AdventOfCode._2019.Day18
             return result;
         }
 
-        private (bool isReable, int x, int y, int steps) CanReach(int x, int y, char target, char[][] grid)
+        private int ShortestPath(int x, int y, int targetX, int targetY, char[][] grid)
         {
-            Queue<(int x, int y, int steps)> queue = new Queue<(int x, int y, int steps)>();
-            HashSet<(int x, int y)> visisted = new HashSet<(int x, int y)>();
-            queue.Enqueue((x, y, 0));
-            visisted.Add((x, y));
-            
-            while (queue.Any())
+            Tile start = new Tile()
             {
-                var current = queue.Dequeue();
+                X = x,
+                Y = y,
+                Distance = CalculateManhattenDistance(x, y, targetX, targetY)
+            };
 
-                if (grid[current.x + 1][current.y] == target)
+            var comparer = Comparer<int>.Default;
+            var queue = new PairingHeap<int, Tile>(comparer);
+            bool[,] visisted = new bool[H, W];
+
+            queue.Add(start.CostDistance, start);
+            visisted[start.X, start.Y] = true;
+
+            Dictionary<(int x, int y), int> map = new Dictionary<(int x, int y), int>
+            {
+                { (start.X, start.Y), start.CostDistance }
+            };
+
+            while (!queue.IsEmpty)
+            {
+                var current = queue.Pop().Value;
+
+                if (current.X == targetX && current.Y == targetY)
                 {
-                    return (true, current.x + 1, current.y, current.steps + 1);
-                }
-                else if (grid[current.x - 1][current.y] == target)
-                {
-                    return (true, current.x - 1, current.y, current.steps + 1);
-                }
-                else if (grid[current.x][current.y + 1] == target)
-                {
-                    return (true, current.x, current.y + 1, current.steps + 1);
-                }
-                else if (grid[current.x][current.y - 1] == target)
-                {
-                    return (true, current.x, current.y - 1, current.steps + 1);
+                    return current.Cost;
                 }
 
-                foreach (var item in ValidTiles(current.x, current.y, grid))
+                foreach (var next in ValidTiles(current, grid))
                 {
-                    if (visisted.Add((item.x, item.y)))
+                    next.Cost = current.Cost + 1;
+                    next.Distance = CalculateManhattenDistance(next.X, next.Y, targetX, targetY);
+
+                    if (map.TryGetValue((next.X, next.Y), out int CostDistance))
                     {
-                        queue.Enqueue((item.x, item.y, current.steps + 1));
+                        if (CostDistance > next.CostDistance)
+                        {
+                            map[(next.X, next.Y)] = next.CostDistance;
+                            queue.Add(next.CostDistance, next);
+                        }
+                    }
+                    else if (!visisted[next.X, next.Y])
+                    {
+                        visisted[next.X, next.Y] = true;
+                        queue.Add(next.CostDistance, next);
+                        map.Add((next.X, next.Y), next.CostDistance);
                     }
                 }
             }
 
-            return (false, -1, -1, -1);
+            return -1;
         }
 
-        private List<(int x, int y)> ValidTiles(int x, int y, char[][] grid)
+        private List<Tile> ValidTiles(Tile current, char[][] grid)
         {
-            List<(int x, int y)> dirs = new List<(int x, int y)>()
+            List<Tile> dirs = new List<Tile>()
             {
-                (1, 0),
-                (-1, 0),
-                (0, 1),
-                (0, -1)
+                new Tile() { X = -1, Y = 0 },
+                new Tile() { X = 1, Y = 0 },
+                new Tile() { X = 0, Y = -1 },
+                new Tile() { X = 0, Y = 1 },
             };
 
-            List<(int x, int y)> valids = new List<(int x, int y)>();
-            foreach (var item in dirs)
+            List<Tile> valids = new List<Tile>();
+            foreach (var next in dirs)
             {
-                var dx = item.x + x;
-                var dy = item.y + y;
+                next.X += current.X;
+                next.Y += current.Y;
 
-                if (dx >= 0 && dx < H && dy >= 0 && dy < W && grid[dx][dy] == (char)Area.FLOOR)
+                if (next.X >= 0 && next.X < H && next.Y >= 0 && next.Y < W && grid[next.X][next.Y] != (char)Area.WALL)
                 {
-                    valids.Add((dx, dy));
+                    valids.Add(next);
                 } 
             }
 
@@ -232,7 +318,7 @@ namespace AdventOfCode._2019.Day18
 
         private void ReadData()
         {
-            string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2019\Day18\input.txt";
+            string path = @"C:\Users\Andreas\Desktop\AdventOfCode2020\2019\Day18\input.txt";
             var lines = File.ReadAllLines(path);
             H = lines.Length;
             W = lines.First().Length;
