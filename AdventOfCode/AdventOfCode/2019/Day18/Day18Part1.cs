@@ -28,7 +28,6 @@ namespace AdventOfCode._2019.Day18
         {
             public int Steps;
             public List<char> CollectedKeys = new List<char>();
-            public List<char> UsedKeys = new List<char>();
             public char Target;
             public int KeyCount;
         }
@@ -113,9 +112,9 @@ namespace AdventOfCode._2019.Day18
                 {
                     Steps = distances[(char)Area.ENTRANCE][target.Value].steps,
                     KeyCount = 1,
+                    CollectedKeys = new List<char>() { target.Value },
                     Target = target.Value
                 };
-                state.CollectedKeys.Add(target.Value);
                 queue.Add(-state.KeyCount, state);
             }
 
@@ -138,13 +137,12 @@ namespace AdventOfCode._2019.Day18
                         KeyCount = current.KeyCount + 1,
                         Steps = current.Steps + target.Value.steps,
                         CollectedKeys = new List<char>(current.CollectedKeys) { target.Key },
-                        UsedKeys = new List<char>(current.UsedKeys),
                         Target = target.Key
                     };
                     queue.Add(-state.KeyCount, state);
                 }
 
-                if (runs % 2500 == 0) Console.WriteLine($"Ran a total of {runs} times -- Best path found: {ans} (Must be lower than: 5976) -- Completed paths: {completedPaths} -- " +
+                if (runs % 30000 == 0) Console.WriteLine($"Ran a total of {runs} times -- Best path found: {ans} (Must be lower than: 5976) -- Completed paths: {completedPaths} -- " +
                     $"Paths left to search: {queue.Count}");
                 runs++;
             }
