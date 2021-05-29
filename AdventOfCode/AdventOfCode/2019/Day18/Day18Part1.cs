@@ -12,10 +12,10 @@ namespace AdventOfCode._2019.Day18
 {
     public class Day18Part1
     {
-        private char[][] grid;
-        private int H, W;
-        private readonly List<(char key, int x, int y)> keys = new List<(char key, int x, int y)>();
-        private readonly List<char> targets = new List<char>();
+        private char[][] _grid;
+        private int _H, _W;
+        private int _keyCount = 0;
+        private readonly List<Target> _targets = new List<Target>();
 
         enum Area
         {
@@ -28,22 +28,20 @@ namespace AdventOfCode._2019.Day18
         {
             public int Steps;
             public char[][] Grid;
-            public List<Key> CollectedKeys = new List<Key>();
-            public int X;
-            public int Y;
+            public List<Target> CollectedKeys = new List<Target>();
+            public Target Target;
             public int KeyCount;
-            public int ItemsUsed;
         }
 
-        class Key
+        class Target
         {
             public int X;
             public int Y;
             public char Value;
 
-            public Key Clone()
+            public Target Clone()
             {
-                return new Key()
+                return new Target()
                 {
                     X = X,
                     Y = Y,
@@ -68,110 +66,122 @@ namespace AdventOfCode._2019.Day18
 
             int x = 0, y = 0;
             bool isFound = false;
-            for (int i = 0; i < H && !isFound; i++)
+            for (int i = 0; i < _H && !isFound; i++)
             {
-                for (int j = 0; j < W && !isFound; j++)
+                for (int j = 0; j < _W && !isFound; j++)
                 {
-                    if (grid[i][j] == (char)Area.ENTRANCE)
+                    if (_grid[i][j] == (char)Area.ENTRANCE)
                     {
                         x = i;
                         y = j;
+                        isFound = true;
                     }
+                }
+            }
+
+            Dictionary<char, Dictionary<char, int>> distances = new Dictionary<char, Dictionary<char, int>>()
+            {
+                { (char)Area.ENTRANCE, new Dictionary<char, int>() }
+            };
+
+            foreach (var target in _targets)
+            {
+                var distance = CalculateShortestPath(x, y, target.X, target.Y, _grid);
+                distances[(char)Area.ENTRANCE].Add(target.Value, distance);
+            }
+
+            foreach (var key in _targets)
+            {
+                distances.Add(key.Value, new Dictionary<char, int>());
+                foreach (var target in _targets)
+                {
+                    if (key.Value == target.Value) continue;
+                    var distance = CalculateShortestPath(key.X, key.Y, target.X, target.Y, _grid);
+                    distances[key.Value].Add(target.Value, distance);
                 }
             }
 
             var comparer = Comparer<int>.Default;
             var queue = new PairingHeap<int, State>(comparer);
 
-            List<Key> valids = new List<Key>();
-            DFS(grid, x, y, new bool[H, W], new List<Key>(), valids);
+            List<Target> reachableTargets = new List<Target>();
+            CalculateReachableTargets(_grid, x, y, new bool[_H, _W], new List<Target>(), reachableTargets);
 
-            foreach (var key in valids)
+            foreach (var key in reachableTargets)
             {
                 var state = new State()
                 {
-                    Grid = CloneGrid(grid),
-                    X = key.X,
-                    Y = key.Y,
-                    Steps = ShortestPath(x, y, key.X, key.Y, grid),
+                    Grid = CloneGrid(_grid),
+                    Steps = distances[(char)Area.ENTRANCE][key.Value],
                     KeyCount = 1,
-                    ItemsUsed = 1
+                    Target = key
                 };
                 state.CollectedKeys.Add(key);
-                state.Grid[state.X][state.Y] = (char)Area.FLOOR;
-                queue.Add(state.Steps, state);
+                state.Grid[state.Target.X][state.Target.Y] = (char)Area.FLOOR;
+                queue.Add(-state.KeyCount, state);
             }
 
-            int ans = int.MaxValue, runs = 0, maxKeys = 0;
+            int ans = int.MaxValue, runs = 0, completedPaths = 0;
             while (!queue.IsEmpty)
             {
                 var current = queue.Pop().Value;
 
-                if (current.KeyCount == keys.Count)
+                if (current.KeyCount == _keyCount)
                 {
-                    if (current.Steps < ans)
-                    {
-                        ans = current.Steps;
-                        Console.WriteLine(ans);
-                    }
+                    ans = Math.Min(ans, current.Steps);
+                    completedPaths++;
                     continue;
                 }
 
-                maxKeys = Math.Max(maxKeys, current.KeyCount);
+                List<Target> _reachableTargets = new List<Target>();
+                CalculateReachableTargets(current.Grid, current.Target.X, current.Target.Y, new bool[_H, _W], current.CollectedKeys, _reachableTargets);
 
-                List<Key> localValids = new List<Key>();
-                DFS(current.Grid, current.X, current.Y, new bool[H, W], current.CollectedKeys, localValids);
-
-                Parallel.ForEach(localValids, key =>
+                Parallel.ForEach(_reachableTargets, target =>
                 {
                     var newGrid = CloneGrid(current.Grid);
-                    var steps = ShortestPath(current.X, current.Y, key.X, key.Y, current.Grid);
-                    if (char.IsUpper(key.Value))
+                    var steps = distances[current.Target.Value][target.Value];
+                    if (char.IsUpper(target.Value))
                     {
                         State state = new State()
                         {
-                            X = key.X,
-                            Y = key.Y,
                             KeyCount = current.KeyCount,
                             Grid = newGrid,
                             Steps = current.Steps + steps,
-                            CollectedKeys = new List<Key>(current.CollectedKeys.Select(k => k.Clone())),
-                            ItemsUsed = current.ItemsUsed + 1
+                            CollectedKeys = new List<Target>(current.CollectedKeys.Select(k => k.Clone())),
+                            Target = target
                         };
-                        state.Grid[key.X][key.Y] = '.';
-                        state.CollectedKeys.Remove(key);
-                        queue.Add(state.Steps, state);
+                        state.Grid[state.Target.X][state.Target.Y] = (char)Area.FLOOR;
+                        state.CollectedKeys.Remove(target);
+                        queue.Add(-state.KeyCount, state);
                     }
                     else
                     {
                         State state = new State()
                         {
-                            X = key.X,
-                            Y = key.Y,
                             KeyCount = current.KeyCount + 1,
-                            Grid = CloneGrid(current.Grid),
+                            Grid = newGrid,
                             Steps = current.Steps + steps,
-                            CollectedKeys = new List<Key>(current.CollectedKeys.Select(k => k.Clone())),
-                            ItemsUsed = current.ItemsUsed + 1
+                            CollectedKeys = new List<Target>(current.CollectedKeys.Select(k => k.Clone())),
+                            Target = target
                         };
-                        state.Grid[key.X][key.Y] = '.';
-                        state.CollectedKeys.Add(key);
-                        queue.Add(state.Steps, state);
+                        state.Grid[state.Target.X][state.Target.Y] = (char)Area.FLOOR;
+                        state.CollectedKeys.Add(target);
+                        queue.Add(-state.KeyCount, state);
                     }
                 });
 
-                if (runs % 1000 == 0)
-                {
-                    Console.WriteLine($"Ran a total of {runs} times - Best amount of keys: {maxKeys}");
-                }
+                if (runs % 2500 == 0) Console.WriteLine($"Ran a total of {runs} times -- Best path found: {ans} (Must be lower than: 5976) -- Completed paths: {completedPaths} -- " +
+                    $"Paths left to search: {queue.Count}");
                 runs++;
             }
+
+            Console.WriteLine("Lower than: 5976");
 
             watch.Stop();
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
         }
 
-        private void DFS(char[][] grid, int x, int y, bool[,] visisted, List<Key> collectedKeys, List<Key> valids)
+        private void CalculateReachableTargets(char[][] grid, int x, int y, bool[,] visisted, List<Target> collectedKeys, List<Target> reachableTargets)
         {
             if (x < 0 || x >= grid.Length || y < 0 || y >= grid[x].Length || visisted[x, y] || grid[x][y] == (char)Area.WALL) return;
 
@@ -179,7 +189,7 @@ namespace AdventOfCode._2019.Day18
             {
                 if (collectedKeys.Any(k => k.Value == char.ToLower(grid[x][y])))
                 {
-                    valids.Add(new Key()
+                    reachableTargets.Add(new Target()
                     {
                         Value = grid[x][y],
                         X = x,
@@ -190,7 +200,7 @@ namespace AdventOfCode._2019.Day18
             }
             else if (char.IsLower(grid[x][y]))
             {
-                valids.Add(new Key()
+                reachableTargets.Add(new Target()
                 {
                     Value = grid[x][y],
                     X = x,
@@ -201,10 +211,10 @@ namespace AdventOfCode._2019.Day18
 
             visisted[x, y] = true;
 
-            DFS(grid, x + 1, y, visisted, collectedKeys, valids);
-            DFS(grid, x - 1, y, visisted, collectedKeys, valids);
-            DFS(grid, x, y + 1, visisted, collectedKeys, valids);
-            DFS(grid, x, y - 1, visisted, collectedKeys, valids);
+            CalculateReachableTargets(grid, x + 1, y, visisted, collectedKeys, reachableTargets);
+            CalculateReachableTargets(grid, x - 1, y, visisted, collectedKeys, reachableTargets);
+            CalculateReachableTargets(grid, x, y + 1, visisted, collectedKeys, reachableTargets);
+            CalculateReachableTargets(grid, x, y - 1, visisted, collectedKeys, reachableTargets);
         }
 
         private void Print(char[][] grid)
@@ -217,12 +227,12 @@ namespace AdventOfCode._2019.Day18
 
         private char[][] CloneGrid(char[][] grid)
         {
-            char[][] result = new char[H][];
+            char[][] result = new char[_H][];
 
-            for (int i = 0; i < H; i++)
+            for (int i = 0; i < _H; i++)
             {
-                result[i] = new char[W];
-                for (int j = 0; j < W; j++)
+                result[i] = new char[_W];
+                for (int j = 0; j < _W; j++)
                 {
                     result[i][j] = grid[i][j];
                 }
@@ -231,7 +241,7 @@ namespace AdventOfCode._2019.Day18
             return result;
         }
 
-        private int ShortestPath(int x, int y, int targetX, int targetY, char[][] grid)
+        private int CalculateShortestPath(int x, int y, int targetX, int targetY, char[][] grid)
         {
             Tile start = new Tile()
             {
@@ -242,7 +252,7 @@ namespace AdventOfCode._2019.Day18
 
             var comparer = Comparer<int>.Default;
             var queue = new PairingHeap<int, Tile>(comparer);
-            bool[,] visisted = new bool[H, W];
+            bool[,] visisted = new bool[_H, _W];
 
             queue.Add(start.CostDistance, start);
             visisted[start.X, start.Y] = true;
@@ -302,10 +312,10 @@ namespace AdventOfCode._2019.Day18
                 next.X += current.X;
                 next.Y += current.Y;
 
-                if (next.X >= 0 && next.X < H && next.Y >= 0 && next.Y < W && grid[next.X][next.Y] != (char)Area.WALL)
+                if (next.X >= 0 && next.X < _H && next.Y >= 0 && next.Y < _W && grid[next.X][next.Y] != (char)Area.WALL)
                 {
                     valids.Add(next);
-                } 
+                }
             }
 
             return valids;
@@ -318,29 +328,29 @@ namespace AdventOfCode._2019.Day18
 
         private void ReadData()
         {
-            string path = @"C:\Users\Andreas\Desktop\AdventOfCode2020\2019\Day18\input.txt";
+            string path = @"C:\Users\Andreas\Desktop\AdventOfCode2020\2019\Day18\sample.txt";
             var lines = File.ReadAllLines(path);
-            H = lines.Length;
-            W = lines.First().Length;
-            grid = new char[H][];
-            for (int i = 0; i < H; i++)
+            _H = lines.Length;
+            _W = lines.First().Length;
+            _grid = new char[_H][];
+            for (int i = 0; i < _H; i++)
             {
-                grid[i] = lines[i].ToCharArray();
+                _grid[i] = lines[i].ToCharArray();
             }
 
-            for (int i = 0; i < H; i++)
+            for (int i = 0; i < _H; i++)
             {
-                for (int j = 0; j < W; j++)
+                for (int j = 0; j < _W; j++)
                 {
-                    char c = grid[i][j];
+                    char c = _grid[i][j];
                     if (char.IsLower(c))
                     {
-                        keys.Add((c, i, j));
-                        targets.Add(c);
+                        _keyCount++;
+                        _targets.Add(new Target() { Value = c, X = i, Y = j });
                     }
                     else if (char.IsUpper(c))
                     {
-                        targets.Add(c);
+                        _targets.Add(new Target() { Value = c, X = i, Y = j });
                     }
                 }
             }
