@@ -27,9 +27,9 @@ namespace AdventOfCode._2019.Day18
         class State
         {
             public int Steps;
-            public char[][] Grid;
-            public List<Target> CollectedKeys = new List<Target>();
-            public Target Target;
+            public List<char> CollectedKeys = new List<char>();
+            public List<char> UsedKeys = new List<char>();
+            public char Target;
             public int KeyCount;
         }
 
@@ -79,25 +79,25 @@ namespace AdventOfCode._2019.Day18
                 }
             }
 
-            Dictionary<char, Dictionary<char, int>> distances = new Dictionary<char, Dictionary<char, int>>()
+            Dictionary<char, Dictionary<char, (int steps, List<char> doors)>> distances = new Dictionary<char, Dictionary<char, (int steps, List<char> doors)>>()
             {
-                { (char)Area.ENTRANCE, new Dictionary<char, int>() }
+                { (char)Area.ENTRANCE, new Dictionary<char, (int steps, List<char> doors)>() }
             };
 
-            foreach (var target in _targets)
+            foreach (var target in _targets.Where(t => char.IsLower(t.Value)))
             {
-                var distance = CalculateShortestPath(x, y, target.X, target.Y, _grid);
-                distances[(char)Area.ENTRANCE].Add(target.Value, distance);
+                var tuple = CalculateShortestPathWithDoors(x, y, target.X, target.Y, _grid);
+                distances[(char)Area.ENTRANCE].Add(target.Value, tuple);
             }
 
-            foreach (var key in _targets)
+            foreach (var me in _targets.Where(t => char.IsLower(t.Value)))
             {
-                distances.Add(key.Value, new Dictionary<char, int>());
-                foreach (var target in _targets)
+                distances.Add(me.Value, new Dictionary<char, (int steps, List<char> doors)>());
+                foreach (var target in _targets.Where(t => char.IsLower(t.Value)))
                 {
-                    if (key.Value == target.Value) continue;
-                    var distance = CalculateShortestPath(key.X, key.Y, target.X, target.Y, _grid);
-                    distances[key.Value].Add(target.Value, distance);
+                    if (me.Value == target.Value) continue;
+                    var tuple = CalculateShortestPathWithDoors(me.X, me.Y, target.X, target.Y, _grid);
+                    distances[me.Value].Add(target.Value, tuple);
                 }
             }
 
@@ -107,22 +107,20 @@ namespace AdventOfCode._2019.Day18
             List<Target> reachableTargets = new List<Target>();
             CalculateReachableTargets(_grid, x, y, new bool[_H, _W], new List<Target>(), reachableTargets);
 
-            foreach (var key in reachableTargets)
+            foreach (var target in reachableTargets.Where(t => char.IsLower(t.Value)))
             {
                 var state = new State()
                 {
-                    Grid = CloneGrid(_grid),
-                    Steps = distances[(char)Area.ENTRANCE][key.Value],
+                    Steps = distances[(char)Area.ENTRANCE][target.Value].steps,
                     KeyCount = 1,
-                    Target = key
+                    Target = target.Value
                 };
-                state.CollectedKeys.Add(key);
-                state.Grid[state.Target.X][state.Target.Y] = (char)Area.FLOOR;
+                state.CollectedKeys.Add(target.Value);
                 queue.Add(-state.KeyCount, state);
             }
 
             int ans = int.MaxValue, runs = 0, completedPaths = 0;
-            while (!queue.IsEmpty)
+            while (queue.Any())
             {
                 var current = queue.Pop().Value;
 
@@ -133,49 +131,29 @@ namespace AdventOfCode._2019.Day18
                     continue;
                 }
 
-                List<Target> _reachableTargets = new List<Target>();
-                CalculateReachableTargets(current.Grid, current.Target.X, current.Target.Y, new bool[_H, _W], current.CollectedKeys, _reachableTargets);
-
-                Parallel.ForEach(_reachableTargets, target =>
+                foreach (var target in distances[current.Target].Where(kv => !current.CollectedKeys.Contains(kv.Key) && (kv.Value.doors.Count == 0 || kv.Value.doors.All(current.CollectedKeys.Contains))))
                 {
-                    var newGrid = CloneGrid(current.Grid);
-                    var steps = distances[current.Target.Value][target.Value];
-                    if (char.IsUpper(target.Value))
+                    State state = new State()
                     {
-                        State state = new State()
-                        {
-                            KeyCount = current.KeyCount,
-                            Grid = newGrid,
-                            Steps = current.Steps + steps,
-                            CollectedKeys = new List<Target>(current.CollectedKeys.Select(k => k.Clone())),
-                            Target = target
-                        };
-                        state.Grid[state.Target.X][state.Target.Y] = (char)Area.FLOOR;
-                        state.CollectedKeys.Remove(target);
-                        queue.Add(-state.KeyCount, state);
-                    }
-                    else
-                    {
-                        State state = new State()
-                        {
-                            KeyCount = current.KeyCount + 1,
-                            Grid = newGrid,
-                            Steps = current.Steps + steps,
-                            CollectedKeys = new List<Target>(current.CollectedKeys.Select(k => k.Clone())),
-                            Target = target
-                        };
-                        state.Grid[state.Target.X][state.Target.Y] = (char)Area.FLOOR;
-                        state.CollectedKeys.Add(target);
-                        queue.Add(-state.KeyCount, state);
-                    }
-                });
+                        KeyCount = current.KeyCount + 1,
+                        Steps = current.Steps + target.Value.steps,
+                        CollectedKeys = new List<char>(current.CollectedKeys) { target.Key },
+                        UsedKeys = new List<char>(current.UsedKeys),
+                        Target = target.Key
+                    };
+                    queue.Add(-state.KeyCount, state);
+                }
 
                 if (runs % 2500 == 0) Console.WriteLine($"Ran a total of {runs} times -- Best path found: {ans} (Must be lower than: 5976) -- Completed paths: {completedPaths} -- " +
                     $"Paths left to search: {queue.Count}");
                 runs++;
             }
 
+            Console.WriteLine($"Ran a total of {runs} times -- Best path found: {ans} (Must be lower than: 5976) -- Completed paths: {completedPaths} -- " +
+                    $"Paths left to search: {queue.Count}");
+
             Console.WriteLine("Lower than: 5976");
+            Console.WriteLine("Wrong answer: 4968");
 
             watch.Stop();
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
@@ -239,6 +217,68 @@ namespace AdventOfCode._2019.Day18
             }
 
             return result;
+        }
+
+        private (int steps, List<char> doors) CalculateShortestPathWithDoors(int x, int y, int targetX, int targetY, char[][] grid)
+        {
+            Tile start = new Tile()
+            {
+                X = x,
+                Y = y,
+                Distance = CalculateManhattenDistance(x, y, targetX, targetY)
+            };
+
+            var comparer = Comparer<int>.Default;
+            var queue = new PairingHeap<int, (Tile tile, List<char> doors)>(comparer);
+            bool[,] visisted = new bool[_H, _W];
+
+            queue.Add(start.CostDistance, (start, new List<char>()));
+            visisted[start.X, start.Y] = true;
+
+            Dictionary<(int x, int y), int> map = new Dictionary<(int x, int y), int>
+            {
+                { (start.X, start.Y), start.CostDistance }
+            };
+
+            while (!queue.IsEmpty)
+            {
+                var current = queue.Pop().Value;
+
+                if (current.tile.X == targetX && current.tile.Y == targetY)
+                {
+                    return (current.tile.Cost, current.doors);
+                }
+
+                foreach (var next in ValidTiles(current.tile, grid))
+                {
+                    next.Cost = current.tile.Cost + 1;
+                    next.Distance = CalculateManhattenDistance(next.X, next.Y, targetX, targetY);
+
+                    if (map.TryGetValue((next.X, next.Y), out int CostDistance))
+                    {
+                        if (CostDistance > next.CostDistance)
+                        {
+                            map[(next.X, next.Y)] = next.CostDistance;
+                            queue.Add(next.CostDistance, (next, current.doors));
+                        }
+                    }
+                    else if (!visisted[next.X, next.Y])
+                    {
+                        List<char> doors = new List<char>(current.doors);
+                        if (char.IsUpper(grid[next.X][next.Y]))
+                        {
+                            var door = _targets.First(t => t.X == next.X && t.Y == next.Y); //Converting door to key
+                            doors.Add(char.ToLower(door.Value));
+                        }
+
+                        visisted[next.X, next.Y] = true;
+                        queue.Add(next.CostDistance, (next, doors));
+                        map.Add((next.X, next.Y), next.CostDistance);
+                    }
+                }
+            }
+
+            return (-1, null);
         }
 
         private int CalculateShortestPath(int x, int y, int targetX, int targetY, char[][] grid)
@@ -328,7 +368,7 @@ namespace AdventOfCode._2019.Day18
 
         private void ReadData()
         {
-            string path = @"C:\Users\Andreas\Desktop\AdventOfCode2020\2019\Day18\sample.txt";
+            string path = @"C:\Users\Andreas\Desktop\AdventOfCode2020\2019\Day18\input.txt";
             var lines = File.ReadAllLines(path);
             _H = lines.Length;
             _W = lines.First().Length;
