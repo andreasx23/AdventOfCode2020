@@ -201,22 +201,6 @@ namespace AdventOfCode._2019.Day18
             }
         }
 
-        private char[][] CloneGrid(char[][] grid)
-        {
-            char[][] result = new char[_H][];
-
-            for (int i = 0; i < _H; i++)
-            {
-                result[i] = new char[_W];
-                for (int j = 0; j < _W; j++)
-                {
-                    result[i][j] = grid[i][j];
-                }
-            }
-
-            return result;
-        }
-
         private (int steps, List<char> doors) CalculateShortestPathWithDoors(int x, int y, int targetX, int targetY, char[][] grid)
         {
             Tile start = new Tile()
@@ -277,61 +261,6 @@ namespace AdventOfCode._2019.Day18
             }
 
             return (-1, null);
-        }
-
-        private int CalculateShortestPath(int x, int y, int targetX, int targetY, char[][] grid)
-        {
-            Tile start = new Tile()
-            {
-                X = x,
-                Y = y,
-                Distance = CalculateManhattenDistance(x, y, targetX, targetY)
-            };
-
-            var comparer = Comparer<int>.Default;
-            var queue = new PairingHeap<int, Tile>(comparer);
-            bool[,] visisted = new bool[_H, _W];
-
-            queue.Add(start.CostDistance, start);
-            visisted[start.X, start.Y] = true;
-
-            Dictionary<(int x, int y), int> map = new Dictionary<(int x, int y), int>
-            {
-                { (start.X, start.Y), start.CostDistance }
-            };
-
-            while (!queue.IsEmpty)
-            {
-                var current = queue.Pop().Value;
-
-                if (current.X == targetX && current.Y == targetY)
-                {
-                    return current.Cost;
-                }
-
-                foreach (var next in ValidTiles(current, grid))
-                {
-                    next.Cost = current.Cost + 1;
-                    next.Distance = CalculateManhattenDistance(next.X, next.Y, targetX, targetY);
-
-                    if (map.TryGetValue((next.X, next.Y), out int CostDistance))
-                    {
-                        if (CostDistance > next.CostDistance)
-                        {
-                            map[(next.X, next.Y)] = next.CostDistance;
-                            queue.Add(next.CostDistance, next);
-                        }
-                    }
-                    else if (!visisted[next.X, next.Y])
-                    {
-                        visisted[next.X, next.Y] = true;
-                        queue.Add(next.CostDistance, next);
-                        map.Add((next.X, next.Y), next.CostDistance);
-                    }
-                }
-            }
-
-            return -1;
         }
 
         private List<Tile> ValidTiles(Tile current, char[][] grid)
