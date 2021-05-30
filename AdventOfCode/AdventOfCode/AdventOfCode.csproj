@@ -241,6 +241,11 @@
     <Compile Include="2019\Day16\Day16Part1.cs" />
     <Compile Include="2019\Day16\Day16Part2.cs" />
     <Compile Include="2019\Day18\Day18Part1.cs" />
+    <Compile Include="2019\Day18\Day18Part2.cs" />
+    <Compile Include="2019\Day18\State.cs" />
+    <Compile Include="2019\Day18\Target.cs" />
+    <Compile Include="2019\Day18\Tile.cs" />
+    <Compile Include="2019\Day18\Utility.cs" />
     <Compile Include="2020\Day10\Day10Part1.cs" />
     <Compile Include="2020\Day10\Day10Part2.cs" />
     <Compile Include="2020\Day11\Day11Part1.cs" />
