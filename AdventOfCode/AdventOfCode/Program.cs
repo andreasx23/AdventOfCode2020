@@ -11,7 +11,7 @@ namespace AdventOfCode
     {
         public static void Main(string[] args)
         {
-            Day18Part1 d = new Day18Part1();
+            Day18Part2 d = new Day18Part2();
             d.TestCase();
         }
     }
