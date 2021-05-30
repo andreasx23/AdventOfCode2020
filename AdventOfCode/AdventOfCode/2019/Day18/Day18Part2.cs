@@ -1,6 +1,5 @@
 ﻿using AlgoKit.Collections.Heaps;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -10,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode._2019.Day18
 {
-    public class Day18Part1
+    public class Day18Part2
     {
         private char[][] _grid;
         private int _H, _W;
@@ -20,7 +19,7 @@ namespace AdventOfCode._2019.Day18
 
         /// <summary>
         /// Bruteforce algorithm -- I have no idea how to optimize my algorithm further
-        /// My answer was: 4668
+        /// My answer was: 
         /// </summary>
         private void Day18()
         {
@@ -62,7 +61,7 @@ namespace AdventOfCode._2019.Day18
             }
 
             int ans = int.MaxValue, totalRuns = 0;
-            for (int i = 0; i < 10; i++) 
+            for (int i = 0; i < 10; i++)
             {
                 var queue = GeneratePriorityQueue(x, y);
 
@@ -276,7 +275,7 @@ namespace AdventOfCode._2019.Day18
 
         private void ReadData()
         {
-            string path = @"C:\Users\Andreas\Desktop\AdventOfCode2020\2019\Day18\input.txt";
+            string path = @"C:\Users\Andreas\Desktop\AdventOfCode2020\2019\Day18\input2.txt";
             var lines = File.ReadAllLines(path);
             _H = lines.Length;
             _W = lines.First().Length;
