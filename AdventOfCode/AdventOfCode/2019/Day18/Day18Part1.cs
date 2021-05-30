@@ -16,6 +16,7 @@ namespace AdventOfCode._2019.Day18
         private int _H, _W;
         private int _keyCount = 0;
         private readonly List<Target> _targets = new List<Target>();
+        private readonly Dictionary<char, List<(char target, int distance, HashSet<char> doors, HashSet<char> keys)>> _distances = new Dictionary<char, List<(char target, int distance, HashSet<char> doors, HashSet<char> keys)>>();
 
         enum Area
         {
@@ -27,7 +28,7 @@ namespace AdventOfCode._2019.Day18
         class State
         {
             public int Steps;
-            public List<char> CollectedKeys = new List<char>();
+            public HashSet<char> CollectedKeys = new HashSet<char>();
             public char Target;
             public int KeyCount;
         }
@@ -37,16 +38,6 @@ namespace AdventOfCode._2019.Day18
             public int X;
             public int Y;
             public char Value;
-
-            public Target Clone()
-            {
-                return new Target()
-                {
-                    X = X,
-                    Y = Y,
-                    Value = Value
-                };
-            }
         }
 
         class Tile
@@ -58,6 +49,10 @@ namespace AdventOfCode._2019.Day18
             public int CostDistance => Cost + Distance;
         }
 
+        /// <summary>
+        /// Bruteforce algorithm -- I have no idea how to optimize my algorithm further
+        /// My answer was: 4668
+        /// </summary>
         private void Day18()
         {
             Stopwatch watch = new Stopwatch();
@@ -78,28 +73,77 @@ namespace AdventOfCode._2019.Day18
                 }
             }
 
-            Dictionary<char, Dictionary<char, (int steps, List<char> doors)>> distances = new Dictionary<char, Dictionary<char, (int steps, List<char> doors)>>()
-            {
-                { (char)Area.ENTRANCE, new Dictionary<char, (int steps, List<char> doors)>() }
-            };
+            _distances.Add((char)Area.ENTRANCE, new List<(char target, int distance, HashSet<char> doors, HashSet<char> keys)>());
 
             foreach (var target in _targets.Where(t => char.IsLower(t.Value)))
             {
-                var tuple = CalculateShortestPathWithDoors(x, y, target.X, target.Y, _grid);
-                distances[(char)Area.ENTRANCE].Add(target.Value, tuple);
+                var (distance, doors, keys) = CalculateShortestPath(x, y, target.X, target.Y, _grid);
+                _distances[(char)Area.ENTRANCE].Add((target.Value, distance, doors, keys));
             }
 
             foreach (var me in _targets.Where(t => char.IsLower(t.Value)))
             {
-                distances.Add(me.Value, new Dictionary<char, (int steps, List<char> doors)>());
+                _distances.Add(me.Value, new List<(char target, int distance, HashSet<char> doors, HashSet<char> keys)>());
                 foreach (var target in _targets.Where(t => char.IsLower(t.Value)))
                 {
                     if (me.Value == target.Value) continue;
-                    var tuple = CalculateShortestPathWithDoors(me.X, me.Y, target.X, target.Y, _grid);
-                    distances[me.Value].Add(target.Value, tuple);
+                    var (distance, doors, keys) = CalculateShortestPath(me.X, me.Y, target.X, target.Y, _grid);
+                    _distances[me.Value].Add((target.Value, distance, doors, keys));
                 }
             }
 
+            int ans = int.MaxValue, totalRuns = 0, completedPaths = 0;
+            for (int i = 0; i < 10; i++) 
+            {
+                var queue = GenerateQueue(x, y);
+
+                int runs = 0;
+                Random rand = new Random();
+                while (queue.Any() && runs < 10_000_000)
+                {
+                    var current = queue.Pop().Value;
+
+                    if (current.KeyCount == _keyCount)
+                    {
+                        ans = Math.Min(ans, current.Steps);
+                        completedPaths++;
+                        continue;
+                    }
+
+                    var targets = _distances[current.Target].Where(kv => !current.CollectedKeys.Contains(kv.target) && (kv.doors.Count == 0 || kv.doors.All(current.CollectedKeys.Contains)));
+                    foreach (var target in targets)
+                    {
+                        State state = new State()
+                        {
+                            KeyCount = current.KeyCount + 1,
+                            Steps = current.Steps + target.distance,
+                            CollectedKeys = new HashSet<char>(current.CollectedKeys) { target.target },
+                            Target = target.target
+                        };
+
+                        foreach (var key in target.keys)
+                        {
+                            if (state.CollectedKeys.Add(key))
+                            {
+                                state.KeyCount++;
+                            }
+                        }
+
+                        queue.Add(rand.Next(0, 50), state);
+                    }
+
+                    if (runs % 30000 == 0) Console.WriteLine($"Current i: {i} -- Ran a total of {totalRuns + runs} times -- Best path found: {ans} -- Completed paths: {completedPaths} -- Paths left to search: {queue.Count}");
+                    runs++;
+                }
+                totalRuns += runs;
+            }
+
+            watch.Stop();
+            Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
+        }
+
+        private PairingHeap<int, State> GenerateQueue(int x, int y)
+        {
             var comparer = Comparer<int>.Default;
             var queue = new PairingHeap<int, State>(comparer);
 
@@ -110,51 +154,15 @@ namespace AdventOfCode._2019.Day18
             {
                 var state = new State()
                 {
-                    Steps = distances[(char)Area.ENTRANCE][target.Value].steps,
+                    Steps = _distances[(char)Area.ENTRANCE].First(kv => kv.target == target.Value).distance,
                     KeyCount = 1,
-                    CollectedKeys = new List<char>() { target.Value },
+                    CollectedKeys = new HashSet<char>() { target.Value },
                     Target = target.Value
                 };
                 queue.Add(-state.KeyCount, state);
             }
 
-            int ans = int.MaxValue, runs = 0, completedPaths = 0;
-            while (queue.Any())
-            {
-                var current = queue.Pop().Value;
-
-                if (current.KeyCount == _keyCount)
-                {
-                    ans = Math.Min(ans, current.Steps);
-                    completedPaths++;
-                    continue;
-                }
-
-                foreach (var target in distances[current.Target].Where(kv => !current.CollectedKeys.Contains(kv.Key) && (kv.Value.doors.Count == 0 || kv.Value.doors.All(current.CollectedKeys.Contains))))
-                {
-                    State state = new State()
-                    {
-                        KeyCount = current.KeyCount + 1,
-                        Steps = current.Steps + target.Value.steps,
-                        CollectedKeys = new List<char>(current.CollectedKeys) { target.Key },
-                        Target = target.Key
-                    };
-                    queue.Add(-state.KeyCount, state);
-                }
-
-                if (runs % 30000 == 0) Console.WriteLine($"Ran a total of {runs} times -- Best path found: {ans} (Must be lower than: 5976) -- Completed paths: {completedPaths} -- " +
-                    $"Paths left to search: {queue.Count}");
-                runs++;
-            }
-
-            Console.WriteLine($"Ran a total of {runs} times -- Best path found: {ans} (Must be lower than: 5976) -- Completed paths: {completedPaths} -- " +
-                    $"Paths left to search: {queue.Count}");
-
-            Console.WriteLine("Lower than: 5976");
-            Console.WriteLine("Wrong answer: 4968");
-
-            watch.Stop();
-            Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
+            return queue;
         }
 
         private void CalculateReachableTargets(char[][] grid, int x, int y, bool[,] visisted, List<Target> collectedKeys, List<Target> reachableTargets)
@@ -201,7 +209,7 @@ namespace AdventOfCode._2019.Day18
             }
         }
 
-        private (int steps, List<char> doors) CalculateShortestPathWithDoors(int x, int y, int targetX, int targetY, char[][] grid)
+        private (int distance, HashSet<char> doors, HashSet<char> keys) CalculateShortestPath(int x, int y, int targetX, int targetY, char[][] grid)
         {
             Tile start = new Tile()
             {
@@ -211,10 +219,10 @@ namespace AdventOfCode._2019.Day18
             };
 
             var comparer = Comparer<int>.Default;
-            var queue = new PairingHeap<int, (Tile tile, List<char> doors)>(comparer);
+            var queue = new PairingHeap<int, (Tile tile, HashSet<char> doors, HashSet<char> keys)>(comparer);
             bool[,] visisted = new bool[_H, _W];
 
-            queue.Add(start.CostDistance, (start, new List<char>()));
+            queue.Add(start.CostDistance, (start, new HashSet<char>(), new HashSet<char>()));
             visisted[start.X, start.Y] = true;
 
             Dictionary<(int x, int y), int> map = new Dictionary<(int x, int y), int>
@@ -228,7 +236,7 @@ namespace AdventOfCode._2019.Day18
 
                 if (current.tile.X == targetX && current.tile.Y == targetY)
                 {
-                    return (current.tile.Cost, current.doors);
+                    return (current.tile.Cost, current.doors, current.keys);
                 }
 
                 foreach (var next in ValidTiles(current.tile, grid))
@@ -241,26 +249,30 @@ namespace AdventOfCode._2019.Day18
                         if (CostDistance > next.CostDistance)
                         {
                             map[(next.X, next.Y)] = next.CostDistance;
-                            queue.Add(next.CostDistance, (next, current.doors));
+                            queue.Add(next.CostDistance, (next, current.doors, current.keys));
                         }
                     }
                     else if (!visisted[next.X, next.Y])
                     {
-                        List<char> doors = new List<char>(current.doors);
+                        HashSet<char> doors = new HashSet<char>(current.doors);
+                        HashSet<char> keys = new HashSet<char>(current.keys);
                         if (char.IsUpper(grid[next.X][next.Y]))
                         {
-                            var door = _targets.First(t => t.X == next.X && t.Y == next.Y); //Converting door to key
-                            doors.Add(char.ToLower(door.Value));
+                            doors.Add(char.ToLower(grid[next.X][next.Y])); //Converting door to key
+                        }
+                        else if (char.IsLower(grid[next.X][next.Y]))
+                        {
+                            keys.Add(grid[next.X][next.Y]);
                         }
 
                         visisted[next.X, next.Y] = true;
-                        queue.Add(next.CostDistance, (next, doors));
+                        queue.Add(next.CostDistance, (next, doors, keys));
                         map.Add((next.X, next.Y), next.CostDistance);
                     }
                 }
             }
 
-            return (-1, null);
+            return (-1, null, null);
         }
 
         private List<Tile> ValidTiles(Tile current, char[][] grid)
