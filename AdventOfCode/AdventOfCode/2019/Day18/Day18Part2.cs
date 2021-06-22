@@ -1,5 +1,6 @@
 ﻿using AlgoKit.Collections.Heaps;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -14,7 +15,6 @@ namespace AdventOfCode._2019.Day18
         private char[][] _grid;
         private int _H, _W;
         private int _keyCount = 0;
-        private readonly List<Target> _targets = new List<Target>();
         private readonly Dictionary<char, List<(char target, int distance, HashSet<char> doors, HashSet<char> keys)>> _distances = new Dictionary<char, List<(char target, int distance, HashSet<char> doors, HashSet<char> keys)>>();
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace AdventOfCode._2019.Day18
             foreach (var robot in robots)
             {
                 List<Target> targets = new List<Target>();
-                CalculateAllTargetsInRegion(_grid, robot.x, robot.y, new bool[_H, _W], targets);
+                FindAllTargetsInRegion(_grid, robot.x, robot.y, new bool[_H, _W], targets);
 
                 _distances.Add(robot.id, new List<(char target, int distance, HashSet<char> doors, HashSet<char> keys)>());
                 foreach (var target in targets.Where(t => char.IsLower(t.Value)))
@@ -66,48 +66,94 @@ namespace AdventOfCode._2019.Day18
             }
 
             int ans = int.MaxValue, totalRuns = 0;
-            for (int i = 0; i < 100; i++)
+            ConcurrentQueue<State> queue = GenerateQueue(robots);
+            Parallel.For(1, 100, new ParallelOptions() { MaxDegreeOfParallelism = 250 }, i =>
             {
-                var queue = GeneratePriorityQueue(robots);
-
                 int runs = 0, completedPaths = 0;
-                Random rand = new Random();
-                while (queue.Any() && runs < 10_000_000)
+
+                //PairingHeap<int, State> queue = GeneratePriorityQueue(robots);
+                while (queue.Any()) // && runs < 10_000_000
                 {
-                    var current = queue.Pop().Value;
-
-                    if (current.KeyCount == _keyCount)
+                    //var current = queue.Pop().Value;
+                    if (queue.TryDequeue(out State current))
                     {
-                        ans = Math.Min(ans, current.Steps);
-                        completedPaths++;
-                        continue;
-                    }
+                        bool newLow = false;
+                        if (current.KeyCount == _keyCount)
+                        {
+                            if (ans > current.Steps)
+                            {
+                                ans = current.Steps;
+                                newLow = true;
+                            }
+                            //ans = Math.Min(ans, current.Steps);
+                            completedPaths++;
+                            continue;
+                        }
 
-                    foreach (var robot in robots)
-                    {
-                        RunSearch(current, robot.id, ref queue, rand);
-                    }
-                    RunSearch(current, current.Target, ref queue, rand);
+                        foreach (var robot in robots)
+                        {
+                            RunSearch(current, robot.id, ref queue, newLow);
+                        }
+                        RunSearch(current, current.Target, ref queue, newLow);
 
-                    if (runs % 30000 == 0) Console.WriteLine($"Current run: {i} -- Ran a total of {totalRuns + runs} times -- Best path found: {ans} -- Completed paths this run: {completedPaths} -- Paths left to search this run: {queue.Count}");
-                    runs++;
+                        if (totalRuns % 30000 == 0) Console.WriteLine($"Current run: {(i + 1).ToString().PadLeft(3, '0')} -- " +
+                            $"Ran a total of {totalRuns + runs} times -- Best path found: {ans} -- Completed paths this run: {completedPaths} -- Paths left to search this run: {queue.Count}");
+                        //runs++;
+                        totalRuns++;
+                    }
                 }
                 totalRuns += runs;
-            }
+            });
+
+            //int ans = int.MaxValue, totalRuns = 0;
+            //for (int i = 0; i < 100; i++)
+            //{
+            //    var queue = GeneratePriorityQueue(robots);
+
+            //    int runs = 0, completedPaths = 0;
+            //    while (queue.Any()) // && runs < 10_000_000
+            //    {
+            //        var current = queue.Pop().Value;
+
+            //        if (current.KeyCount == _keyCount)
+            //        {
+            //            ans = Math.Min(ans, current.Steps);
+            //            completedPaths++;
+            //            continue;
+            //        }
+
+            //        foreach (var robot in robots)
+            //        {
+            //            RunSearch(current, robot.id, ref queue);
+            //        }
+            //        RunSearch(current, current.Target, ref queue);
+
+            //        if (runs % 30000 == 0) Console.WriteLine($"Current run: {i} -- Ran a total of {totalRuns + runs} times -- Best path found: {ans} -- Completed paths this run: {completedPaths} -- Paths left to search this run: {queue.Count}");
+            //        runs++;
+            //    }
+            //    totalRuns += runs;
+            //}
 
             Console.WriteLine("Lower than: 2592");
             Console.WriteLine("Wrong answer: 2578");
             Console.WriteLine("Wrong answer: 2552");
+            Console.WriteLine("Wrong answer: 2310");
+            Console.WriteLine("Wrong answer: 2232");
+            Console.WriteLine("Wrong answer: 1954");
+
+            //Possible: 2100
 
             watch.Stop();
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
         }
 
-        private void RunSearch(State current, char id, ref PairingHeap<int, State> queue, Random rand)
+        //private void RunSearch(State current, char id, ref PairingHeap<int, State> queue, bool newLow)
+        private void RunSearch(State current, char id, ref ConcurrentQueue<State> queue, bool newLow)
         {
-            var targets = _distances[id].Where(kv => !current.CollectedKeys.Contains(kv.target) &&
-                                                (kv.doors.Count == 0 || kv.doors.All(current.CollectedKeys.Contains)));
-            foreach (var target in targets)
+            var targets = _distances[id].Where(kv => !current.CollectedKeys.Contains(kv.target) && (kv.doors.Count == 0 || kv.doors.All(current.CollectedKeys.Contains)));
+
+            Random rand = new Random();
+            foreach (var target in targets.OrderBy(x => rand.Next()))
             {
                 State state = new State()
                 {
@@ -125,8 +171,36 @@ namespace AdventOfCode._2019.Day18
                     }
                 }
 
-                queue.Add(rand.Next(0, 50), state);
+                //queue.Add(newLow ? -10 : rand.Next(0, 5), state);
+                queue.Enqueue(state);
             }
+        }
+
+        private ConcurrentQueue<State> GenerateQueue(List<(int x, int y, char id)> robots)
+        {
+            ConcurrentQueue<State> queue = new ConcurrentQueue<State>();
+
+            Random rand = new Random();
+            foreach (var (x, y, id) in robots.OrderBy(x => rand.Next()))
+            {
+                List<Target> reachableTargets = new List<Target>();
+                FindReachableTargets(_grid, x, y, new bool[_H, _W], new List<Target>(), reachableTargets);
+
+                foreach (var target in reachableTargets.Where(t => char.IsLower(t.Value)))
+                {
+                    var state = new State()
+                    {
+                        Steps = _distances[id].First(kv => kv.target == target.Value).distance,
+                        KeyCount = 1,
+                        CollectedKeys = new HashSet<char>() { target.Value },
+                        Target = target.Value
+                    };
+
+                    queue.Enqueue(state);
+                }
+            }
+
+            return queue;
         }
 
         private PairingHeap<int, State> GeneratePriorityQueue(List<(int x, int y, char id)> robots)
@@ -134,28 +208,29 @@ namespace AdventOfCode._2019.Day18
             var comparer = Comparer<int>.Default;
             var queue = new PairingHeap<int, State>(comparer);
 
-            foreach (var robot in robots)
+            Random rand = new Random();
+            foreach (var (x, y, id) in robots.OrderBy(x => rand.Next()))
             {
                 List<Target> reachableTargets = new List<Target>();
-                CalculateReachableTargets(_grid, robot.x, robot.y, new bool[_H, _W], new List<Target>(), reachableTargets);
+                FindReachableTargets(_grid, x, y, new bool[_H, _W], new List<Target>(), reachableTargets);
 
                 foreach (var target in reachableTargets.Where(t => char.IsLower(t.Value)))
                 {
                     var state = new State()
                     {
-                        Steps = _distances[robot.id].First(kv => kv.target == target.Value).distance,
+                        Steps = _distances[id].First(kv => kv.target == target.Value).distance,
                         KeyCount = 1,
                         CollectedKeys = new HashSet<char>() { target.Value },
                         Target = target.Value
                     };
-                    queue.Add(-state.KeyCount, state);
+                    queue.Add(-1, state);
                 }
             }
 
             return queue;
         }
 
-        private void CalculateReachableTargets(char[][] grid, int x, int y, bool[,] visisted, List<Target> collectedKeys, List<Target> reachableTargets)
+        private void FindReachableTargets(char[][] grid, int x, int y, bool[,] visisted, List<Target> collectedKeys, List<Target> reachableTargets)
         {
             if (x < 0 || x >= grid.Length || y < 0 || y >= grid[x].Length || visisted[x, y] || grid[x][y] == (char)Area.WALL) return;
 
@@ -185,13 +260,13 @@ namespace AdventOfCode._2019.Day18
 
             visisted[x, y] = true;
 
-            CalculateReachableTargets(grid, x + 1, y, visisted, collectedKeys, reachableTargets);
-            CalculateReachableTargets(grid, x - 1, y, visisted, collectedKeys, reachableTargets);
-            CalculateReachableTargets(grid, x, y + 1, visisted, collectedKeys, reachableTargets);
-            CalculateReachableTargets(grid, x, y - 1, visisted, collectedKeys, reachableTargets);
+            FindReachableTargets(grid, x + 1, y, visisted, collectedKeys, reachableTargets);
+            FindReachableTargets(grid, x - 1, y, visisted, collectedKeys, reachableTargets);
+            FindReachableTargets(grid, x, y + 1, visisted, collectedKeys, reachableTargets);
+            FindReachableTargets(grid, x, y - 1, visisted, collectedKeys, reachableTargets);
         }
 
-        private void CalculateAllTargetsInRegion(char[][] grid, int x, int y, bool[,] visisted, List<Target> targets)
+        private void FindAllTargetsInRegion(char[][] grid, int x, int y, bool[,] visisted, List<Target> targets)
         {
             if (x < 0 || x >= grid.Length || y < 0 || y >= grid[x].Length || visisted[x, y] || grid[x][y] == (char)Area.WALL) return;
 
@@ -207,10 +282,10 @@ namespace AdventOfCode._2019.Day18
 
             visisted[x, y] = true;
 
-            CalculateAllTargetsInRegion(grid, x + 1, y, visisted, targets);
-            CalculateAllTargetsInRegion(grid, x - 1, y, visisted, targets);
-            CalculateAllTargetsInRegion(grid, x, y + 1, visisted, targets);
-            CalculateAllTargetsInRegion(grid, x, y - 1, visisted, targets);
+            FindAllTargetsInRegion(grid, x + 1, y, visisted, targets);
+            FindAllTargetsInRegion(grid, x - 1, y, visisted, targets);
+            FindAllTargetsInRegion(grid, x, y + 1, visisted, targets);
+            FindAllTargetsInRegion(grid, x, y - 1, visisted, targets);
         }
 
         private void Print(char[][] grid)
@@ -319,29 +394,22 @@ namespace AdventOfCode._2019.Day18
 
         private void ReadData()
         {
-            string path = @"C:\Users\andre\Desktop\AdventOfCode2020\2019\Day18\input2.txt";
+            string path = @"C:\Users\Andreas\Desktop\AdventOfCode2020\2019\Day18\input2.txt";
             var lines = File.ReadAllLines(path);
             _H = lines.Length;
             _W = lines.First().Length;
             _grid = new char[_H][];
-            for (int i = 0; i < _H; i++)
-            {
-                _grid[i] = lines[i].ToCharArray();
-            }
 
             for (int i = 0; i < _H; i++)
             {
+                _grid[i] = lines[i].ToCharArray();
+
                 for (int j = 0; j < _W; j++)
                 {
                     char c = _grid[i][j];
                     if (char.IsLower(c))
                     {
                         _keyCount++;
-                        _targets.Add(new Target() { Value = c, X = i, Y = j });
-                    }
-                    else if (char.IsUpper(c))
-                    {
-                        _targets.Add(new Target() { Value = c, X = i, Y = j });
                     }
                 }
             }

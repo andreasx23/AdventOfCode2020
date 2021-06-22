@@ -4,63 +4,105 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace AdventOfCode.Day19
 {
     public class Day19Part1
     {
-        private HashSet<string> input = new HashSet<string>();
-        private List<string> messages = new List<string>();
+        class Rule
+        {
+            public int Id;
+            public List<List<Rule>> Children = new List<List<Rule>>();
+            public char Value;
+        }
 
-        //Unsolved
+        private readonly Dictionary<int, Rule> map = new Dictionary<int, Rule>();
+        private readonly List<string> words = new List<string>();
+
         private void Day19()
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            int ans = 0;
+            List<Rule> rules = map.Values.ToList();
+            Rule zero = rules.First(r => r.Id == 0);
+            string pattern = GenerateRegexPattern(zero);
+            int ans = words.Count(w => Regex.IsMatch(w, pattern));
+
             watch.Stop();
             Console.WriteLine($"Answer: {ans} took {watch.ElapsedMilliseconds} ms");
         }
 
+        private string GenerateRegexPattern(Rule current)
+        {
+            if (char.IsLetter(current.Value))
+            {
+                return current.Value.ToString();
+            }
+
+            string part = "";
+            foreach (var childs in current.Children)
+            {
+                string innerPart = "";
+                foreach (var child in childs)
+                {
+                    innerPart += GenerateRegexPattern(child);
+                }
+                part += $"({innerPart})";
+            }
+            return part;
+        }
+
         private void ReadData()
         {
-            string path = @"C:\Users\andre\Desktop\AdventOfCode2020\Day 19\input.txt";
+            string path = @"C:\Users\Andreas\Desktop\AdventOfCode2020\2020\Day 19\sample.txt";
             var lines = File.ReadAllLines(path);
 
             int index = 0;
-            Dictionary<int, List<string>> map = new Dictionary<int, List<string>>();
             while (!string.IsNullOrEmpty(lines[index]))
             {
-                string s = lines[index];
-                var split = s.Split(':');
-                var rules = split[1].Trim().Split('|');
+                var split = lines[index].Split(':').Select(s => s.Trim());
 
-                map.Add(index, new List<string>());
-                foreach (var _rule in rules)
+                if (!map.ContainsKey(int.Parse(split.First())))
                 {
-                    string rule = _rule.Trim();
-                    map[index].Add(rule);
+                    map.Add(int.Parse(split.First()), new Rule() { Id = int.Parse(split.First()) });
                 }
+
+                var current = map[int.Parse(split.First())];
+
+                var children = split.Last().Split('|').Select(s => s.Trim());
+                foreach (var s in children)
+                {
+                    if (s.Any(c => char.IsLetter(c)))
+                    {
+                        current.Value = s.Substring(1, 1).First();
+                        break;
+                    }
+
+                    var nums = s.Split(' ').Select(val => int.Parse(val.Trim()));
+
+                    List<Rule> rules = new List<Rule>();
+                    foreach (var num in nums)
+                    {
+                        if (!map.ContainsKey(num))
+                        {
+                            map.Add(num, new Rule() { Id = num });
+                        }
+                        var child = map[num];
+                        rules.Add(child);
+                    }
+                    current.Children.Add(rules);
+                }
+
                 index++;
             }
-            
-            for (int i = index + 1; i < lines.Length; i++)
+
+            index++;
+            for (int i = index; i < lines.Length; i++)
             {
-                messages.Add(lines[i]);
-            }
-
-            var ordered = map.OrderBy(kv => kv.Key);
-            foreach (var kv_map in map)
-            {
-                //Console.WriteLine(item.Key + " " + string.Join(" ", item.Value));
-                StringBuilder sb = new StringBuilder();
-
-                while (true)
-                {
-
-                }
+                words.Add(lines[i]);
             }
         }
 

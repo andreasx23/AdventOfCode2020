@@ -167,6 +167,8 @@
     <Compile Include="2016\Day17\Tile.cs" />
     <Compile Include="2016\Day18\Day18Part1.cs" />
     <Compile Include="2016\Day18\Day18Part2.cs" />
+    <Compile Include="2016\Day19\Day19Part1.cs" />
+    <Compile Include="2016\Day19\Day19Part2.cs" />
     <Compile Include="2016\Day20\Day20Part1.cs" />
     <Compile Include="2016\Day20\Day20Part2.cs" />
     <Compile Include="2016\Day21\Day21Part1.cs" />
