@@ -220,8 +220,11 @@
     <Compile Include="2018\Day15\PriorityQueue.cs" />
     <Compile Include="2018\Day15\Unit.cs" />
     <Compile Include="2018\Day17\Day17Part1.cs" />
+    <Compile Include="2018\Day18\Day18Part1.cs" />
+    <Compile Include="2018\Day18\Day18Part2.cs" />
     <Compile Include="2018\Day22\Day22Part1.cs" />
     <Compile Include="2018\Day22\Day22Part2.cs" />
+    <Compile Include="2018\Day24\Day24Part1.cs" />
     <Compile Include="2019\Day01\Day1Part1.cs" />
     <Compile Include="2019\Day01\Day1Part2.cs" />
     <Compile Include="2019\Day02\Day2Part1.cs" />
@@ -296,6 +299,10 @@
     <Compile Include="2020\Day24\Day24Part1.cs" />
     <Compile Include="2020\Day24\Day24Part2.cs" />
     <Compile Include="2020\Day25\Day25Part1.cs" />
+    <Compile Include="2021\Day01\Day1Part1.cs" />
+    <Compile Include="2021\Day01\Day1Part2.cs" />
+    <Compile Include="2021\Day02\Day2Part1.cs" />
+    <Compile Include="2021\Day02\Day2Part2.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
