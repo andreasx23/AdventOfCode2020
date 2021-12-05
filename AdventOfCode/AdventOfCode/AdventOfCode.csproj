@@ -303,6 +303,12 @@
     <Compile Include="2021\Day01\Day1Part2.cs" />
     <Compile Include="2021\Day02\Day2Part1.cs" />
     <Compile Include="2021\Day02\Day2Part2.cs" />
+    <Compile Include="2021\Day03\Day3Part1.cs" />
+    <Compile Include="2021\Day03\Day3Part2.cs" />
+    <Compile Include="2021\Day04\Day4Part1.cs" />
+    <Compile Include="2021\Day04\Day4Part2.cs" />
+    <Compile Include="2021\Day05\Day5Part1.cs" />
+    <Compile Include="2021\Day05\Day5Part2.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
