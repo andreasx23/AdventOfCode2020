@@ -317,6 +317,7 @@
     <Compile Include="2021\Day08\Day8Part2.cs" />
     <Compile Include="2021\Day09\Day9Part1.cs" />
     <Compile Include="2021\Day09\Day9Part2.cs" />
+    <Compile Include="2021\Day15\Day15Part2.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
